@@ -9,6 +9,10 @@ import type {
 } from '../types';
 
 export const api = {
+  exportBackup: (path: string) => invoke<void>('export_backup', { path }),
+  restoreBackup: (path: string) => invoke<string>('restore_backup', { path }),
+  directory: () => invoke<string>('get_data_directory'),
+  openDirectory: () => invoke<void>('open_data_directory'),
   addTemplates: (selected: TemplateSelection[]) =>
     invoke<number[]>('add_templates', { selected }),
   history: (taskId: number) =>

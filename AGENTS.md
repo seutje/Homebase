@@ -4,7 +4,7 @@
 
 Read DESIGN.md and the relevant phase of PLAN.md before implementation. Inspect existing code before adding new patterns. DESIGN.md defines the intended behavior; PLAN.md records delivery status. Keep both aligned with intentional changes and tell the user about material scope or behavior changes.
 
-The current repository starts with specifications, an empty README, and a WorDrop reference copy. Do not assume scaffolding, scripts, or tests exist until inspected. Documentation completion is not application completion.
+The app lives in `src/` and `src-tauri/`; README.md documents the working development and verification commands. Inspect the current implementation and PLAN.md before deciding what remains. Documentation completion is not application completion. The original WorDrop reference may no longer be present locally; do not make development depend on it.
 
 ## Product priorities
 

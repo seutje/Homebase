@@ -28,7 +28,7 @@ function Homebase() {
   const [backdate, setBackdate] = useState<Task | null>(null);
   const [pending, setPending] = useState<number[]>([]);
   const locks = useRef(new Set<number>());
-  const { toasts, notify, remove } = useToasts();
+  const { toasts, notify, remove, clear } = useToasts();
   const [category, setCategory] = useState<number | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
   const [form, setForm] = useState<Task | 'new' | null>(null);
@@ -303,6 +303,14 @@ function Homebase() {
         <Settings
           display={display}
           onSaved={refresh}
+          onRestored={async () => {
+            clear();
+            setSelected(null);
+            setBackdate(null);
+            setCategory(null);
+            setStatus(null);
+            await refresh();
+          }}
           onClose={() => setSettings(false)}
         />
       )}

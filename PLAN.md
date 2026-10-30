@@ -72,14 +72,14 @@ Exit: the user can quickly populate a useful list without false completion dates
 
 ## Phase 6 — Backup, restore, and usable v1
 
-- [ ] Add native save/open dialogs, a consistent SQLite backup snapshot, and visible data-directory access in Settings.
-- [ ] Implement staged restore validation, compatibility checks, confirmation, and automatic pre-restore backup.
-- [ ] Suspend writes during replacement and reopen cleanly; preserve the original data on validation/replacement failure.
-- [ ] Test backup round-trip including preferences/history, cancelled dialogs, invalid/newer backups, older-schema migration, and failed restore recovery.
-- [ ] Run the relevant frontend checks and Rust suite; fix failures before marking this phase complete.
-- [ ] Build a local Windows NSIS installer; verify install, launch, restart, upgrade data retention, and offline operation.
-- [ ] Run the DESIGN.md manual v1 workflow checklist on the packaged app, including narrow window and display scaling.
-- [ ] Update README with actual commands, backup location/behavior, and any known limitations; reconcile DESIGN.md with delivered behavior.
+- [x] Add native save/open dialogs, a consistent SQLite backup snapshot, and visible data-directory access in Settings.
+- [x] Implement staged restore validation, compatibility checks, confirmation, and automatic pre-restore backup.
+- [x] Suspend writes during replacement, apply the staged snapshot atomically through SQLite's backup API, and refresh; preserve original data on failure.
+- [x] Test backup round-trip including preferences/history, cancelled pickers/confirmation, invalid/newer backups, and failed restore recovery. Schema v1 is the first backup format; no older format exists yet.
+- [x] Run the relevant frontend checks and Rust suite; fix failures before marking this phase complete.
+- [x] Build a local Windows NSIS installer; verify install, launch, restart, reinstall data retention, uninstall data preservation, and operation with external web requests blocked. This is the first release; no older Homebase version exists to upgrade from.
+- [x] Exercise the DESIGN.md v1 workflows through Playwright CLI against the native app and smoke-test the installed release, including narrow-window and scaling checks. File-picker path selection is stubbed; native backup/restore remains real.
+- [x] Update README with actual commands, backup location/behavior, and any known limitations; reconcile DESIGN.md with delivered behavior.
 
 Exit: v1 can be used daily and its data can be recovered. Stop here for actual use before adding optional scope.
 

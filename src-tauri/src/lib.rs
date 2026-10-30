@@ -1,3 +1,4 @@
+mod backup;
 mod categories;
 mod completions;
 mod database;
@@ -73,8 +74,53 @@ fn add_templates(store: State<Store>, selected: Vec<library::Selection>) -> Resu
     store.with(|c| library::add(c, selected, chrono::Local::now().date_naive()))
 }
 
+#[tauri::command]
+fn export_backup(store: State<Store>, path: String) -> Result<()> {
+    store.with(|c| {
+        backup::export(
+            c,
+            std::path::Path::new(&path),
+            &store.directory.join("homebase.db"),
+        )
+    })
+}
+#[tauri::command]
+fn restore_backup(store: State<Store>, path: String) -> Result<String> {
+    store.with(|c| {
+        backup::restore(
+            c,
+            std::path::Path::new(&path),
+            &store.directory,
+            chrono::Local::now().date_naive(),
+        )
+        .map(|p| p.to_string_lossy().to_string())
+    })
+}
+#[tauri::command]
+fn get_data_directory(store: State<Store>) -> String {
+    store.directory.to_string_lossy().to_string()
+}
+#[tauri::command]
+fn open_data_directory(store: State<Store>) -> Result<()> {
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer.exe")
+            .arg(&store.directory)
+            .spawn()?;
+        Ok(())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = store;
+        Err(error::AppError::invalid(
+            "Opening the data folder is available on Windows.",
+        ))
+    }
+}
+
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             list_tasks,
             save_task,
@@ -88,7 +134,11 @@ pub fn run() {
             record_completion,
             update_completion,
             delete_completion,
-            add_templates
+            add_templates,
+            export_backup,
+            restore_backup,
+            get_data_directory,
+            open_data_directory
         ])
         .setup(|app| {
             // A debug-only isolated data directory keeps UI checks out of personal data.

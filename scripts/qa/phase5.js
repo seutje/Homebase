@@ -1,7 +1,7 @@
 async (page) => {
   await page.reload();
   // This session uses the isolated .qa/native-data database.
-  await page.evaluate(async () => {const result=await window.__TAURI_INTERNALS__.invoke('list_tasks'); for(const task of result.tasks) if(task.sourceTemplateKey) await window.__TAURI_INTERNALS__.invoke('delete_task',{id:task.id});});
+  await page.evaluate(async () => {const directory=await window.__TAURI_INTERNALS__.invoke('get_data_directory'); if(!directory.replaceAll('\\','/').includes('/.qa/')) throw new Error('Use isolated QA data only'); const result=await window.__TAURI_INTERNALS__.invoke('list_tasks'); for(const task of result.tasks) if(task.sourceTemplateKey) await window.__TAURI_INTERNALS__.invoke('delete_task',{id:task.id});});
   await page.reload();
   await page.getByRole('button', {name:'Browse suggested chores',exact:true}).click();
   await page.getByRole('combobox', {name:'Browse category',exact:true}).selectOption('Laundry');

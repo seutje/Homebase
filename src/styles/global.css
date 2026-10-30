@@ -678,3 +678,28 @@ main > :not(.task-list) {
 .library-start {
   margin-left: 10px;
 }
+.backup-settings {
+  border-top: 1px solid var(--border);
+  margin-top: 22px;
+  padding-top: 14px;
+}
+.backup-settings h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+.backup-settings .text-button {
+  font-size: 12px;
+}
+.data-path {
+  overflow-wrap: anywhere;
+  margin-top: 18px;
+}
+.success-message {
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 12px;
+  border-radius: 7px;
+  background: #e7edde;
+  color: #334e39;
+  overflow-wrap: anywhere;
+}

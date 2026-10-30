@@ -1,4 +1,6 @@
 async (page) => {
+  const directory=await page.evaluate(()=>window.__TAURI_INTERNALS__.invoke('get_data_directory'));
+  if(!directory.replaceAll('\\','/').includes('/.qa/')) throw new Error('Use an isolated QA data directory');
   if (!(await page.getByRole('dialog').count())) await page.getByRole('button', { name: '+ Add task', exact: true }).click();
   await page.getByLabel('Task name').fill('Wash bedsheets');
   await page.getByRole('combobox', { name: 'Category', exact: true }).selectOption('2');

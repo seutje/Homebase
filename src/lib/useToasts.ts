@@ -12,5 +12,10 @@ export function useToasts() {
     setToasts((all) => [...all, { key, text, undo }]);
     timers.current.push(setTimeout(() => remove(key), 10_000));
   };
-  return { toasts, notify, remove };
+  const clear = () => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    setToasts([]);
+  };
+  return { toasts, notify, remove, clear };
 }

@@ -1,4 +1,6 @@
 async (page) => {
+  const directory=await page.evaluate(()=>window.__TAURI_INTERNALS__.invoke('get_data_directory'));
+  if(!directory.replaceAll('\\','/').includes('/.qa/')) throw new Error('Use an isolated QA data directory');
   await page.getByRole('button', {name:'⚙ Settings'}).click();
   await page.getByRole('combobox', {name:'Show last completion as',exact:true}).selectOption('relative');
   await page.getByRole('button', {name:'Close dialog'}).click();

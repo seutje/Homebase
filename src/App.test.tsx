@@ -94,9 +94,7 @@ describe('completion workflows', () => {
     await user.click(screen.getByRole('button', { name: 'Save completion' }));
     await screen.findByText('Already recorded on that date.');
     expect(record).toHaveBeenCalledWith(3, '2026-10-21');
-    expect(
-      screen.queryByRole('button', { name: /^Undo$/ }),
-    ).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Undo$/ })).toBeNull();
     expect(screen.queryByLabelText('Task details')).toBeNull();
   });
   it('keeps the previous completion visible when a write fails', async () => {
@@ -111,9 +109,7 @@ describe('completion workflows', () => {
     expect(screen.getByText('9 days ago')).toBeVisible();
     expect(screen.queryByText('Today', { exact: true })).toBeNull();
     await waitFor(() =>
-      expect(
-        screen.getByRole('button', { name: /^Done$/ }),
-      ).toBeEnabled(),
+      expect(screen.getByRole('button', { name: /^Done$/ })).toBeEnabled(),
     );
   });
 });

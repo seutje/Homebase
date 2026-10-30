@@ -1,6 +1,6 @@
 # Homebase design
 
-Status: specification; application implementation has not started.
+Status: v1 implemented and verified, including backup/restore and the Windows installer. Optional v2 work remains separate in PLAN.md.
 
 ## Purpose and scope
 
@@ -203,7 +203,7 @@ Use weekday integers 1=Monday through 7=Sunday. CHECK constraints distinguish re
 
 Settings offers Export backup and Restore backup using native file dialogs. A backup is a consistent SQLite snapshot produced through the SQLite backup API, including tasks, history, categories, preferences, and schema version. Do not copy an actively written database file or depend on users copying its WAL sidecar. No ZIP format or cloud backup is needed.
 
-Restore validates integrity, required tables, schema compatibility, and domain data in a staged copy before replacing live data. Explicitly confirm replacement, automatically keep a pre-restore snapshot, suspend database operations while switching, and reopen/refresh only on success. Migrate supported older backups in staging; reject newer schemas. Cancelled dialogs make no changes. Test failed restores without losing the existing database. Show the data directory in Settings with an Open folder action.
+Restore validates integrity, required tables, schema compatibility, and domain data in a staged copy before replacing live data. Explicitly confirm replacement, automatically keep a pre-restore snapshot, and hold the database mutex during replacement. Implementation choice: use SQLite's backup API to apply the validated staged database to the existing connection atomically; a failed copy rolls back rather than requiring filesystem replacement and reopening. Refresh only on success, close any open task details, and clear Undo feedback that refers to the previous database. Migrate supported older backups in staging; reject newer schemas. Schema version 1 is the first supported backup format. Cancelled dialogs make no changes. Test failed restores without losing the existing database. Show the data directory in Settings with an Open folder action.
 
 Build locally for Windows with an NSIS installer. Preserve user data across upgrades/uninstall unless the user explicitly removes it. The first release needs no auto-updater, signing pipeline, website, telemetry, or CI deployment system. Document prerequisites and actual working commands in README when scaffolding exists; adapt WorDrop's MSVC initialization wrappers if needed.
 
