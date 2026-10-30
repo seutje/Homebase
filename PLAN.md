@@ -11,12 +11,12 @@ This is a sequential implementation checklist for DESIGN.md. Check an item only 
 
 ## Phase 1 — Runnable Windows foundation
 
-- [ ] Scaffold Tauri 2, React, TypeScript, and Vite at the repository root; use a new Homebase identity and compatible locked dependencies.
-- [ ] Add plain CSS tokens and the native-title-bar desktop shell, sidebar, and empty task list.
-- [ ] Configure the window dimensions, minimum size, and platform-required app icon without introducing image features.
-- [ ] Add frontend formatting, lint, typecheck, test, build, and native test commands; adapt MSVC setup wrappers only if needed.
-- [ ] Write README with verified prerequisites, development commands, and local build instructions.
-- [ ] Verify the shell launches through Tauri on Windows; confirm frontend production build and Rust compile checks pass.
+- [x] Scaffold Tauri 2, React, TypeScript, and Vite at the repository root; use a new Homebase identity and compatible locked dependencies.
+- [x] Add plain CSS tokens and the native-title-bar desktop shell, sidebar, and empty task list.
+- [x] Configure the window dimensions, minimum size, and platform-required app icon without introducing image features.
+- [x] Add frontend formatting, lint, typecheck, test, build, and native test commands; adapt MSVC setup wrappers only if needed.
+- [x] Write README with verified prerequisites, development commands, and local build instructions.
+- [x] Verify the shell launches through Tauri on Windows; confirm frontend production build and Rust compile checks pass.
 
 Exit: a real desktop window runs locally with no copied wardrobe features or runtime network dependency.
 

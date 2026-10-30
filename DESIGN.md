@@ -114,12 +114,12 @@ V1 supports one weekday every week, such as Every Sunday. More elaborate calenda
 
 Let `days_until_due = next_due - today`.
 
-| Condition | Status | Display |
-| --- | --- | --- |
-| Negative | Needs attention | N days overdue |
-| Zero | Needs attention | Due today |
-| 1 through the coming-up window | Coming up | Due in N days |
-| Greater than that window | All good | Due in N days |
+| Condition                      | Status          | Display        |
+| ------------------------------ | --------------- | -------------- |
+| Negative                       | Needs attention | N days overdue |
+| Zero                           | Needs attention | Due today      |
+| 1 through the coming-up window | Coming up       | Due in N days  |
+| Greater than that window       | All good        | Due in N days  |
 
 The default coming-up window is `min(7, max(1, ceil(interval_days × 0.2)))`. Relative month intervals use the actual span from latest completion to next due; when never completed, use the span from start to start + interval. Weekly calendar schedules use 7 interval days. Never completed remains the main completion label regardless of status.
 
@@ -129,17 +129,17 @@ V1 sorts by next due ascending, then title case-insensitively, then ID for stabl
 
 With today fixed to **2026-10-30**:
 
-| Input | Expected result |
-| --- | --- |
-| Last done October 21, every 7 days | 9 days ago; next due October 28; 2 days overdue |
-| Last done October 24, every 7 days | 6 days ago; due October 31; coming up |
-| Never completed, start October 30 | Never completed; due today (relative recurrence) |
-| Done October 30, then backdate another entry October 27 | Last done remains October 30 |
-| Delete October 30 above | Last done becomes October 27; all due values recompute |
-| Every Sunday, latest completion October 20 | Due October 25; still overdue October 30 |
-| Every Sunday, complete Friday October 30 | Last done today; next due November 1 |
-| January 31, 2027 + 1 month | February 28, 2027 |
-| January 31, 2028 + 1 month | February 29, 2028 |
+| Input                                                   | Expected result                                        |
+| ------------------------------------------------------- | ------------------------------------------------------ |
+| Last done October 21, every 7 days                      | 9 days ago; next due October 28; 2 days overdue        |
+| Last done October 24, every 7 days                      | 6 days ago; due October 31; coming up                  |
+| Never completed, start October 30                       | Never completed; due today (relative recurrence)       |
+| Done October 30, then backdate another entry October 27 | Last done remains October 30                           |
+| Delete October 30 above                                 | Last done becomes October 27; all due values recompute |
+| Every Sunday, latest completion October 20              | Due October 25; still overdue October 30               |
+| Every Sunday, complete Friday October 30                | Last done today; next due November 1                   |
+| January 31, 2027 + 1 month                              | February 28, 2027                                      |
+| January 31, 2028 + 1 month                              | February 29, 2028                                      |
 
 ## Suggested chore library
 
@@ -190,12 +190,12 @@ Use narrow typed commands: list tasks with computed status, get history, save/de
 
 ### Minimal schema
 
-| Table | Fields and constraints |
-| --- | --- |
-| categories | `id INTEGER PRIMARY KEY`, nonempty `name`, unique case-insensitive name, `position` |
-| tasks | `id INTEGER PRIMARY KEY`, nonempty `title`, `category_id` foreign key, `schedule_kind`, nullable `interval_value`/`interval_unit`/`weekday`, `tracking_start_on`, nullable `source_template_key`, UTC `created_at`/`updated_at` |
-| completions | `id INTEGER PRIMARY KEY`, `task_id` foreign key with cascade delete, `completed_on`, UTC `created_at`/`updated_at`; unique `(task_id, completed_on)` |
-| settings | `key TEXT PRIMARY KEY`, JSON `value`; initially only completion display mode |
+| Table       | Fields and constraints                                                                                                                                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| categories  | `id INTEGER PRIMARY KEY`, nonempty `name`, unique case-insensitive name, `position`                                                                                                                                             |
+| tasks       | `id INTEGER PRIMARY KEY`, nonempty `title`, `category_id` foreign key, `schedule_kind`, nullable `interval_value`/`interval_unit`/`weekday`, `tracking_start_on`, nullable `source_template_key`, UTC `created_at`/`updated_at` |
+| completions | `id INTEGER PRIMARY KEY`, `task_id` foreign key with cascade delete, `completed_on`, UTC `created_at`/`updated_at`; unique `(task_id, completed_on)`                                                                            |
+| settings    | `key TEXT PRIMARY KEY`, JSON `value`; initially only completion display mode                                                                                                                                                    |
 
 Use weekday integers 1=Monday through 7=Sunday. CHECK constraints distinguish relative schedules (value + unit, no weekday) from weekly schedules (weekday, no interval). Validate real calendar dates in Rust; string shape checks alone are insufficient. Index task category and completion task/date. Derive last completed as `MAX(completed_on)`; never maintain a second writable last-completed field. Version two fields are added in later migrations rather than speculative v1 tables.
 
