@@ -147,6 +147,32 @@ export function TaskDetail({
         >
           Edit task
         </button>
+        {(task.notes || task.links.length > 0) && (
+          <section className="task-notes">
+            <h3>Notes and links</h3>
+            {task.notes && <p className="plain-notes">{task.notes}</p>}
+            {task.links.map((url, index) => (
+              <button
+                key={url}
+                className="task-link text-button"
+                disabled={working}
+                title="Open in your browser"
+                onClick={async () => {
+                  setWorking(true);
+                  try {
+                    await api.openLink(task.id, index);
+                  } catch (e) {
+                    setError(errorMessage(e));
+                  } finally {
+                    setWorking(false);
+                  }
+                }}
+              >
+                {url} ↗
+              </button>
+            ))}
+          </section>
+        )}
         <h3>Completion history</h3>
         {task.recurrenceDue !== task.nextDue && (
           <p className="hint">

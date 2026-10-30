@@ -18,6 +18,8 @@ beforeEach(() => {
   };
   task = {
     id: 3,
+    notes: '',
+    links: [],
     activeMonths: [],
     isSnoozed: false,
     isOutOfSeason: false,
@@ -54,6 +56,26 @@ afterEach(() => {
 });
 
 describe('completion workflows', () => {
+  it('combines optional notes search with category/status filtering and clear filters', async () => {
+    const user = userEvent.setup();
+    task.notes = 'Use Affresh tablet';
+    render(<App />);
+    await screen.findByText('9 days ago');
+    await user.type(
+      screen.getByRole('searchbox', { name: 'Search' }),
+      'affresh',
+    );
+    await screen.findByText('Nothing here right now.');
+    await user.click(screen.getByRole('checkbox', { name: 'Include notes' }));
+    await screen.findByText('9 days ago');
+    await user.click(screen.getByRole('button', { name: /Laundry\s*1/ }));
+    await user.click(
+      screen.getByRole('button', { name: /1\s*Needs attention/ }),
+    );
+    expect(screen.getByText('9 days ago')).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Clear filters' }));
+    expect(screen.getByRole('searchbox', { name: 'Search' })).toHaveValue('');
+  });
   it('snoozes without hiding completion age from All tasks, with a separate filter', async () => {
     const user = userEvent.setup();
     vi.spyOn(api, 'snooze').mockImplementation(async (_id, until) => {

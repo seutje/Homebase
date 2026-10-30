@@ -14,7 +14,7 @@ The app lives in `src/` and `src-tauri/`; README.md documents the working develo
 4. Everything necessary for daily use works offline with local data.
 5. Keep the app and codebase appropriate for one person using Windows.
 
-V1 covers the core chores workflow, templates, and manual backup/restore. V2 features are optional separate phases. Do not pull them into foundation work without a practical need or user instruction.
+V1 covers the core chores workflow, templates, and manual backup/restore. The user authorized v2 phases 7–9: snooze/urgency, seasonal months, and notes/links/search/sorting. Preserve these behaviors and their migrations; consult PLAN.md for verification status before adding further scope.
 
 ## Scope limits
 

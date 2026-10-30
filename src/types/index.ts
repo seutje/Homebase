@@ -9,6 +9,8 @@ export type UrgencyDefaults = {
 };
 export type Category = { id: number; name: string };
 export type Task = {
+  notes: string;
+  links: string[];
   activeMonths: number[];
   isSnoozed: boolean;
   isOutOfSeason: boolean;
@@ -30,6 +32,8 @@ export type Task = {
   graceDays: number | null;
 };
 export type TaskInput = {
+  notes: string;
+  links: string[];
   activeMonths: number[];
   id: number | null;
   title: string;

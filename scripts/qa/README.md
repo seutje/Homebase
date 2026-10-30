@@ -53,4 +53,40 @@ The release scripts intentionally use the normal app data directory because a
 release ignores the debug override. Run them only deliberately: the creation
 script refuses a pre-existing fixture with its exact QA title, and the cleanup
 script removes only that fixture. Picker selection itself is not an automated
-Windows-dialog test. No cross-version backup/upgrade test is applicable yet.
+Windows-dialog test. The v1 release had no older version to upgrade from.
+
+## V2 verification
+
+Start the development server, then use the isolated v2 harness:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/qa/start-debug.ps1
+npx --yes @playwright/cli -s=homebase-v2 attach --cdp http://127.0.0.1:9237
+npx --yes @playwright/cli -s=homebase-v2 run-code --filename scripts/qa/phase7.js
+npx --yes @playwright/cli -s=homebase-v2 run-code --filename scripts/qa/phase8.js
+npx --yes @playwright/cli -s=homebase-v2 run-code --filename scripts/qa/phase9.js
+```
+
+Use a fresh `.qa/v2-data` directory for phase 7; phase 8 uses its task and phase 9
+uses both earlier fixtures. The start script restarts only the recorded debug
+process after checking its executable path. It leaves the ordinary app database
+untouched. These fixtures also expect October 30, 2026.
+
+Phases 7–9 passed against the real native app. This covers snooze-aware Undo,
+unsnooze, persisted default/task urgency, seasonal months and counts, notes and
+multiple links, invalid URL feedback, search/filter combinations, every sort,
+reload persistence, and minimum-width layout. The external-browser invocation
+is intercepted through its transport in phase 9 to avoid opening test websites;
+backend URL validation is covered by native tests. There are no image previews
+or browser-only persistence substitutes.
+
+The final v2 suite has 26 passing native tests and 8 passing frontend tests,
+including v1-to-v2 migration and backup round-trips with all added fields.
+
+The v0.2.0 installer was also installed in `.qa/v2-installed`, exercised with
+external WebView requests blocked, reinstalled, and restarted. The two
+`v2-release-*.js` scripts verified all v2 fields and snooze-aware Undo through the
+installed release, then deleted only their owned QA task. The packaged console
+had zero errors/warnings. The temporary installation was uninstalled, leaving
+the database unchanged by the uninstall operation. These release scripts use
+the normal app data directory deliberately, just like the v1 release scripts.

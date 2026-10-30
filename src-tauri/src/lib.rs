@@ -4,6 +4,7 @@ mod completions;
 mod database;
 mod error;
 mod library;
+mod notes;
 mod schedule;
 mod seasons;
 mod settings;
@@ -133,10 +134,16 @@ fn undo_completion(store: State<Store>, id: i64) -> Result<()> {
     store.with(|c| completions::undo(c, id, chrono::Local::now().date_naive()))
 }
 
+#[tauri::command]
+fn open_task_link(store: State<Store>, id: i64, index: usize) -> Result<()> {
+    store.with(|c| notes::open(c, id, index))
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
+            open_task_link,
             snooze_task,
             save_urgency_defaults,
             undo_completion,

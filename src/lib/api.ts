@@ -10,6 +10,8 @@ import type {
 } from '../types';
 
 export const api = {
+  openLink: (id: number, index: number) =>
+    invoke<void>('open_task_link', { id, index }),
   snooze: (id: number, until: string | null) =>
     invoke<void>('snooze_task', { id, until }),
   saveUrgency: (value: UrgencyDefaults) =>

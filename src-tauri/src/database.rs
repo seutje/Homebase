@@ -2,7 +2,7 @@ use crate::error::{AppError, Result};
 use rusqlite::Connection;
 use std::path::Path;
 
-pub const SCHEMA_VERSION: i64 = 3;
+pub const SCHEMA_VERSION: i64 = 4;
 pub fn open(path: &Path) -> Result<Connection> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
@@ -32,6 +32,9 @@ pub fn migrate(conn: &mut Connection) -> Result<()> {
     }
     if version < 3 {
         apply(conn, include_str!("../migrations/0003_seasons.sql"), 3)?;
+    }
+    if version < 4 {
+        apply(conn, include_str!("../migrations/0004_notes_links.sql"), 4)?;
     }
     Ok(())
 }

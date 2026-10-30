@@ -5,6 +5,7 @@ import { api, errorMessage } from '../../lib/api';
 import { localToday } from '../../lib/format';
 import type { Display, UrgencyDefaults } from '../../types';
 import { UrgencyFields } from '../../components/UrgencyFields';
+import packageInfo from '../../../package.json';
 
 export function Settings({
   display,
@@ -167,7 +168,7 @@ export function Settings({
         </p>
       )}
       <div className="settings-about">
-        <strong>Homebase · 0.1.0</strong>
+        <strong>Homebase · {packageInfo.version}</strong>
         <p>
           A little less to remember.
           <br />

@@ -19,6 +19,8 @@ export function TaskForm({
   onClose: () => void;
 }) {
   const initial: TaskInput = {
+    notes: task?.notes ?? '',
+    links: task?.links ?? [],
     activeMonths: task?.activeMonths ?? [],
     id: task?.id ?? null,
     title: task?.title ?? '',
@@ -30,13 +32,15 @@ export function TaskForm({
     graceDays: task?.graceDays ?? null,
   };
   const [input, setInput] = useState(initial);
+  const [linkText, setLinkText] = useState(initial.links.join('\n'));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const confirm = useConfirm();
   const close = async () => {
     if (
       !busy &&
-      (JSON.stringify(input) === JSON.stringify(initial) ||
+      ((JSON.stringify(input) === JSON.stringify(initial) &&
+        linkText === initial.links.join('\n')) ||
         (await confirm('Discard your unsaved task changes?')))
     )
       onClose();
@@ -54,7 +58,13 @@ export function TaskForm({
           setBusy(true);
           setError('');
           try {
-            await api.saveTask(input);
+            await api.saveTask({
+              ...input,
+              links: linkText
+                .split(/\r?\n/)
+                .map((line) => line.trim())
+                .filter(Boolean),
+            });
             await onSaved();
             onClose();
           } catch (e) {
@@ -251,6 +261,31 @@ export function TaskForm({
                 </button>
               ))}
             </div>
+          </details>
+          <details>
+            <summary>Notes and links</summary>
+            <label>
+              Notes
+              <textarea
+                rows={5}
+                maxLength={20000}
+                value={input.notes}
+                onChange={(e) => update('notes', e.target.value)}
+                placeholder="Instructions, model numbers, things to remember…"
+              />
+            </label>
+            <label>
+              Links (one per line)
+              <textarea
+                rows={3}
+                value={linkText}
+                onChange={(e) => setLinkText(e.target.value)}
+                placeholder="https://example.com/manual"
+              />
+            </label>
+            <p className="hint">
+              HTTP(S) links open in your browser only when you click them.
+            </p>
           </details>
         </fieldset>
         {error && (

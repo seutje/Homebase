@@ -83,7 +83,7 @@ Exit: the user can quickly populate a useful list without false completion dates
 
 Exit: v1 can be used daily and its data can be recovered. Stop here for actual use before adding optional scope.
 
-## Phase 7 — V2: snooze and personal urgency (optional)
+## Phase 7 — V2: snooze and personal urgency (complete)
 
 - [x] Add migrated snooze state and Snooze/Unsnooze controls without changing completion history or actual recurrence.
 - [x] Show snoozed tasks in All tasks and a dedicated filter; adjust counts and wake on the selected local date.
@@ -93,7 +93,7 @@ Exit: v1 can be used daily and its data can be recovered. Stop here for actual u
 
 Exit: postponement and gentler urgency are understandable without distorting last completion.
 
-## Phase 8 — V2: seasonal tasks (optional)
+## Phase 8 — V2: seasonal tasks (complete)
 
 - [x] Add active-month configuration through a migration and simple task editor controls.
 - [x] Implement active-window due behavior, Out of season labels, and active summary counts as described in DESIGN.md.
@@ -102,12 +102,12 @@ Exit: postponement and gentler urgency are understandable without distorting las
 
 Exit: seasonal chores become relevant at the appropriate time without fabricated history.
 
-## Phase 9 — V2: notes, links, search, and sorting (optional)
+## Phase 9 — V2: notes, links, search, and sorting (complete)
 
-- [ ] Add plain-text notes and user-managed HTTP(S) links in task details with the necessary migration.
-- [ ] Open valid links through the system browser only on user action.
-- [ ] Add title/category search and optional notes search, combined with existing filters and clear empty states.
-- [ ] Add longest since done, most overdue, category, and alphabetical sorts with stable tie behavior.
-- [ ] Verify combined search/category/status behavior, never-completed ordering, notes persistence, and rejected invalid URL schemes.
+- [x] Add plain-text notes and user-managed HTTP(S) links in task details with the necessary migration.
+- [x] Open valid links through the system browser only on user action.
+- [x] Add title/category search and optional notes search, combined with existing filters and clear empty states.
+- [x] Add longest since done, most overdue, category, and alphabetical sorts with stable tie behavior.
+- [x] Verify combined search/category/status behavior, never-completed ordering, notes persistence, and rejected invalid URL schemes.
 
 Exit: the extended app remains easy to scan and maintains the always-visible completion information.

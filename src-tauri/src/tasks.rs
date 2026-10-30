@@ -13,6 +13,10 @@ use serde::Serialize;
 #[serde(rename_all = "camelCase")]
 pub struct TaskInput {
     #[serde(default)]
+    pub notes: String,
+    #[serde(default)]
+    pub links: Vec<String>,
+    #[serde(default)]
     pub active_months: Vec<u32>,
     pub id: Option<i64>,
     pub title: String,
@@ -27,6 +31,8 @@ pub struct TaskInput {
 }
 
 pub fn save(conn: &mut Connection, input: &TaskInput, today: NaiveDate) -> Result<i64> {
+    crate::notes::validate(&input.notes)?;
+    let links = crate::notes::normalize_links(&input.links)?;
     crate::seasons::validate(&input.active_months)?;
     crate::urgency::validate(input.coming_up_days, input.grace_days)?;
     let title = input.title.trim();
@@ -91,6 +97,10 @@ pub fn save(conn: &mut Connection, input: &TaskInput, today: NaiveDate) -> Resul
         "UPDATE tasks SET active_months=?1 WHERE id=?2",
         params![serde_json::to_string(&input.active_months).unwrap(), id],
     )?;
+    tx.execute(
+        "UPDATE tasks SET notes=?1,links=?2 WHERE id=?3",
+        params![input.notes, serde_json::to_string(&links).unwrap(), id],
+    )?;
     tx.commit()?;
     Ok(id)
 }
@@ -105,6 +115,8 @@ pub fn delete(conn: &Connection, id: i64) -> Result<()> {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Task {
+    pub notes: String,
+    pub links: Vec<String>,
     pub active_months: Vec<u32>,
     pub is_snoozed: bool,
     pub is_out_of_season: bool,
@@ -199,7 +211,15 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
         if is_out_of_season {
             timing.status = "outOfSeason";
         }
+        let (notes, links): (String, String) =
+            conn.query_row("SELECT notes,links FROM tasks WHERE id=?1", [id], |r| {
+                Ok((r.get(0)?, r.get(1)?))
+            })?;
+        crate::notes::validate(&notes)?;
+        let links = crate::notes::parse_links(&links)?;
         tasks.push(Task {
+            notes,
+            links,
             active_months,
             is_snoozed,
             is_out_of_season,
@@ -235,6 +255,41 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
 mod tests {
     use super::*;
     #[test]
+    fn notes_links_persist_and_invalid_link_edits_do_not_overwrite_them() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("notes.db");
+        let today = date("2026-10-30").unwrap();
+        {
+            let mut c = crate::database::open(&path).unwrap();
+            let mut input = TaskInput {
+                notes: "Use cleaning cycle\nModel ABC".into(),
+                links: vec!["https://example.com/manual".into()],
+                active_months: vec![],
+                coming_up_days: None,
+                grace_days: None,
+                id: None,
+                title: "Washer".into(),
+                category_id: 1,
+                schedule: Schedule::Relative {
+                    value: 1,
+                    unit: "months".into(),
+                },
+                tracking_start_on: today.to_string(),
+                initial_completed_on: None,
+            };
+            let id = save(&mut c, &input, today).unwrap();
+            input.id = Some(id);
+            input.notes = "Do not save".into();
+            input.links = vec!["file:///C:/secret".into()];
+            assert!(save(&mut c, &input, today).is_err());
+            assert!(crate::notes::link_for(&c, id, 1).is_err());
+        }
+        let c = crate::database::open(&path).unwrap();
+        let task = list(&c, today).unwrap().tasks.remove(0);
+        assert_eq!(task.notes, "Use cleaning cycle\nModel ABC");
+        assert_eq!(task.links, vec!["https://example.com/manual"]);
+    }
+    #[test]
     fn seasonal_settings_persist_and_snooze_remains_independent() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("seasonal.db");
@@ -242,6 +297,8 @@ mod tests {
         {
             let mut c = crate::database::open(&path).unwrap();
             let input = TaskInput {
+                notes: String::new(),
+                links: vec![],
                 active_months: vec![11, 12, 1, 2],
                 coming_up_days: None,
                 grace_days: None,
@@ -282,6 +339,8 @@ mod tests {
         {
             let mut c = crate::database::open(&path).unwrap();
             let mut input = TaskInput {
+                notes: String::new(),
+                links: vec![],
                 active_months: vec![],
                 coming_up_days: None,
                 grace_days: None,

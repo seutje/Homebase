@@ -147,6 +147,23 @@ pub fn restore(
 mod tests {
     use super::*;
     #[test]
+    fn v2_backup_preserves_seasons_urgency_snooze_notes_and_links() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut c = setup(dir.path());
+        let today = crate::schedule::date("2026-10-30").unwrap();
+        c.execute("UPDATE tasks SET active_months='[11,12,1,2]',notes='Model ABC',links='[\"https://example.com/manual\"]',grace_days=4 WHERE id=1",[]).unwrap();
+        crate::urgency::snooze(&c, 1, Some("2026-11-03".into()), today).unwrap();
+        let path = dir.path().join("v2.db");
+        export(&c, &path, &dir.path().join("homebase.db")).unwrap();
+        crate::tasks::delete(&c, 1).unwrap();
+        restore(&mut c, &path, dir.path(), today).unwrap();
+        let task = crate::tasks::list(&c, today).unwrap().tasks.remove(0);
+        assert_eq!(task.notes, "Model ABC");
+        assert_eq!(task.links.len(), 1);
+        assert_eq!(task.grace_days, Some(4));
+        assert!(task.is_snoozed && task.is_out_of_season);
+    }
+    #[test]
     fn v1_backups_migrate_in_staging_without_modifying_source() {
         let dir = tempfile::tempdir().unwrap();
         let mut live = setup(dir.path());
@@ -179,6 +196,8 @@ mod tests {
         crate::tasks::save(
             &mut c,
             &crate::tasks::TaskInput {
+                notes: String::new(),
+                links: vec![],
                 active_months: vec![],
                 coming_up_days: None,
                 grace_days: None,

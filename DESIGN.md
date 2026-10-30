@@ -1,6 +1,6 @@
 # Homebase design
 
-Status: v1 implemented and verified, including backup/restore and the Windows installer. Optional v2 work remains separate in PLAN.md.
+Status: v1 and all three v2 phases implemented. PLAN.md records completed verification; v0.2.0 includes the v2 features.
 
 ## Purpose and scope
 
@@ -14,7 +14,7 @@ The supplied screenshot informs hierarchy and content: date, summary counts, cat
 
 **V1:** tasks, editable categories, relative intervals, weekly calendar schedules, always-visible completion age/date, one-click completion, backdating, undo, editable history, a bundled chore library, and manual backup/restore. Include a simple deterministic default ordering; advanced search and sorting belong to v2.
 
-**V2, optional after real use:** snooze, configurable urgency, seasonal tasks, notes and links, search and selectable sorting. These are planned extensions, not blockers for using v1.
+**V2 (v0.2.0):** snooze, configurable urgency, seasonal tasks, notes and links, search and selectable sorting. These extend the original v1 workflow.
 
 No desktop notifications in either initial scope. “Due” means an in-app status. Closing the window exits the app; no background process or system tray behavior is needed.
 
@@ -199,6 +199,8 @@ Use narrow typed commands: list tasks with computed status, get history, save/de
 
 Use weekday integers 1=Monday through 7=Sunday. CHECK constraints distinguish relative schedules (value + unit, no weekday) from weekly schedules (weekday, no interval). Validate real calendar dates in Rust; string shape checks alone are insufficient. Index task category and completion task/date. Derive last completed as `MAX(completed_on)`; never maintain a second writable last-completed field. Version two fields are added in later migrations rather than speculative v1 tables.
 
+Schema 4 adds `snoozed_until`, `snooze_revision`, nullable urgency overrides, active-month JSON, plain-text notes, and link JSON to tasks. Completion rows retain the prior snooze and the revision that cleared it, allowing an exact Undo without overwriting newer choices. Settings also hold urgency defaults. Migrations 2–4 preserve existing task IDs and history; backups from schemas 1–4 are supported and migrate only in staging during restore.
+
 ## Local data safety and delivery
 
 Settings offers Export backup and Restore backup using native file dialogs. A backup is a consistent SQLite snapshot produced through the SQLite backup API, including tasks, history, categories, preferences, and schema version. Do not copy an actively written database file or depend on users copying its WAL sidecar. No ZIP format or cloud backup is needed.
@@ -213,7 +215,9 @@ Phase 7 implementation: snoozed tasks are excluded from all active urgency count
 
 Phase 8 implementation: no selected months (or all twelve) means all year. A gap between selected months starts a separate active window. Out-of-season status takes precedence over urgency, while snooze remains independently visible and manageable through its filter. The original recurrence date is retained alongside the seasonal due date; details explain any carry-forward. Completion is allowed outside the season and records only the actual date chosen.
 
-Implement these only after v1 is usable; each is independently useful.
+Phase 9 implementation: notes are plain text (up to 20,000 characters); each task can hold up to 20 complete HTTP(S) links, normalized and deduplicated on save. The backend selects a stored link by task ID and index, validates it again, and opens the Windows default browser only after a click. There is no URL fetching or preview. Search matches titles/categories, and notes when the checkbox is enabled. Category, search, and status filters combine; summary counts use category/search before status filtering. Sort choices are next due, most overdue, longest since done (never completed first), category, and alphabetical, with title/ID ties. Search and sorting are session state, keeping persistent preferences small.
+
+These were implemented as phases 7–9 after v1 was usable.
 
 - **Snooze without completion:** choose a future date, persist `snoozed_until`, and leave history and true next due untouched. Until that date show Snoozed until…, retain last completion and actual due in the row, and exclude it from attention/coming-up counts. All tasks still includes it; provide a Snoozed filter and count. Wake on that date, clear on completion or explicit unsnooze, and test undo restoring any snooze cleared by that completion transaction.
 - **Custom urgency:** per-task coming-up window and overdue grace days, with app defaults. The true due date stays visible. Grace delays attention styling, not history or recurrence. Add an explicit Due within grace state and account for it in summary counts; never turn a recorded overdue date into a fictitious completion.

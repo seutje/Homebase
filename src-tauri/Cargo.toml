@@ -1,6 +1,6 @@
 [package]
 name = "homebase"
-version = "0.1.0"
+version = "0.2.0"
 description = "Personal household task tracker"
 edition = "2021"
 
@@ -19,6 +19,7 @@ rusqlite = { version = "0.32", features = ["bundled", "backup"] }
 chrono = { version = "0.4", features = ["serde"] }
 tauri-plugin-dialog = "2"
 tempfile = "3"
+url = "2"
 
 [profile.release]
 strip = true

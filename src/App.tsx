@@ -14,6 +14,11 @@ import { useToasts } from './lib/useToasts';
 import { Toasts } from './components/Toasts';
 import { ChoreLibrary } from './features/library/ChoreLibrary';
 import { SnoozeForm } from './features/tasks/SnoozeForm';
+import {
+  matchesSearch,
+  sortTasks,
+  type SortMode,
+} from './features/tasks/taskFilters';
 
 export default function App() {
   return (
@@ -37,6 +42,9 @@ function Homebase() {
   const [manageCategories, setManageCategories] = useState(false);
   const [settings, setSettings] = useState(false);
   const [library, setLibrary] = useState(false);
+  const [query, setQuery] = useState('');
+  const [includeNotes, setIncludeNotes] = useState(false);
+  const [sort, setSort] = useState<SortMode>('due');
   const tasks = data?.tasks ?? [];
   const selectedTask = tasks.find((t) => t.id === selected);
   const complete = async (task: Task, completedOn: string) => {
@@ -72,15 +80,21 @@ function Homebase() {
     if (data) void complete(task, data.asOfDate).catch(() => {});
   };
   const activeCategory = categories.find((c) => c.id === category);
-  const categoryTasks = activeCategory
+  const inCategory = activeCategory
     ? tasks.filter((t) => t.categoryId === category)
     : tasks;
-  const visible = status
-    ? categoryTasks.filter((t) =>
-        status === 'snoozed' ? t.isSnoozed : t.status === status,
-      )
-    : categoryTasks;
-  const filtered = !!activeCategory || !!status;
+  const categoryTasks = inCategory.filter((t) =>
+    matchesSearch(t, query, includeNotes),
+  );
+  const visible = sortTasks(
+    status
+      ? categoryTasks.filter((t) =>
+          status === 'snoozed' ? t.isSnoozed : t.status === status,
+        )
+      : categoryTasks,
+    sort,
+  );
+  const filtered = !!activeCategory || !!status || !!query.trim();
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -148,6 +162,38 @@ function Homebase() {
             <button onClick={() => void refresh()}>Retry</button>
           </div>
         )}
+        <div className="search-toolbar">
+          <label className="search-field">
+            Search
+            <input
+              type="search"
+              placeholder="Search tasks or categories…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </label>
+          <label className="notes-search">
+            <input
+              type="checkbox"
+              checked={includeNotes}
+              onChange={(e) => setIncludeNotes(e.target.checked)}
+            />
+            Include notes
+          </label>
+          <label className="sort-field">
+            Sort by
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortMode)}
+            >
+              <option value="due">Next due</option>
+              <option value="overdue">Most overdue</option>
+              <option value="elapsed">Longest since done</option>
+              <option value="category">Category</option>
+              <option value="alpha">Alphabetical</option>
+            </select>
+          </label>
+        </div>
         <div className="summary">
           {(
             [
@@ -209,6 +255,7 @@ function Homebase() {
               onClick={() => {
                 setCategory(null);
                 setStatus(null);
+                setQuery('');
               }}
             >
               Clear filters
@@ -358,6 +405,7 @@ function Homebase() {
             setSnoozing(null);
             setCategory(null);
             setStatus(null);
+            setQuery('');
             await refresh();
           }}
           onClose={() => setSettings(false)}
