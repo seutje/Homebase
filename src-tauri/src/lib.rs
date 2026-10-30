@@ -1,4 +1,5 @@
 mod categories;
+mod completions;
 mod database;
 mod error;
 mod schedule;
@@ -44,6 +45,28 @@ fn set_display(store: State<Store>, value: String) -> Result<()> {
     store.with(|c| settings::set_display(c, &value))
 }
 
+#[tauri::command]
+fn list_completions(store: State<Store>, task_id: i64) -> Result<Vec<completions::Completion>> {
+    store.with(|c| completions::list(c, task_id))
+}
+#[tauri::command]
+fn record_completion(
+    store: State<Store>,
+    task_id: i64,
+    completed_on: String,
+) -> Result<completions::Recorded> {
+    store
+        .with(|c| completions::record(c, task_id, &completed_on, chrono::Local::now().date_naive()))
+}
+#[tauri::command]
+fn update_completion(store: State<Store>, id: i64, completed_on: String) -> Result<()> {
+    store.with(|c| completions::update(c, id, &completed_on, chrono::Local::now().date_naive()))
+}
+#[tauri::command]
+fn delete_completion(store: State<Store>, id: i64) -> Result<()> {
+    store.with(|c| completions::delete(c, id, chrono::Local::now().date_naive()))
+}
+
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -54,7 +77,11 @@ pub fn run() {
             save_category,
             delete_category,
             get_display,
-            set_display
+            set_display,
+            list_completions,
+            record_completion,
+            update_completion,
+            delete_completion
         ])
         .setup(|app| {
             // A debug-only isolated data directory keeps UI checks out of personal data.

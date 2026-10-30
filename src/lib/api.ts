@@ -1,7 +1,23 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { Category, Display, TaskInput, TaskList } from '../types';
+import type {
+  Category,
+  Display,
+  TaskInput,
+  TaskList,
+  Completion,
+} from '../types';
 
 export const api = {
+  history: (taskId: number) =>
+    invoke<Completion[]>('list_completions', { taskId }),
+  record: (taskId: number, completedOn: string) =>
+    invoke<{ id: number; inserted: boolean }>('record_completion', {
+      taskId,
+      completedOn,
+    }),
+  updateCompletion: (id: number, completedOn: string) =>
+    invoke<void>('update_completion', { id, completedOn }),
+  deleteCompletion: (id: number) => invoke<void>('delete_completion', { id }),
   tasks: () => invoke<TaskList>('list_tasks'),
   categories: () => invoke<Category[]>('list_categories'),
   display: () => invoke<Display>('get_display'),

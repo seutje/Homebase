@@ -49,14 +49,14 @@ Exit: real tasks can be managed and their age and due status read reliably in th
 
 ## Phase 4 — Completion and editable history
 
-- [ ] Implement transactional record/update/delete completion commands and the per-task/date uniqueness rule.
-- [ ] Wire one-click Done with pending state and success/error feedback after commit.
-- [ ] Implement Complete on another date with date validation and duplicate handling.
-- [ ] Add per-completion Undo feedback lasting about 10 seconds; undo targets the exact inserted entry.
-- [ ] Build the detail panel with newest-first history, date correction, confirmed deletion, and task editing/deletion.
-- [ ] Recompute and refresh list/detail after every history mutation; prevent nested completion actions from opening the detail panel.
-- [ ] Test double-click/retry behavior, backdating older/newer records, deleting the latest/all history, undo after another completion, and failed writes.
-- [ ] Add a small set of UI integration tests for Done, backdate, Undo, and error feedback.
+- [x] Implement transactional record/update/delete completion commands and the per-task/date uniqueness rule.
+- [x] Wire one-click Done with pending state and success/error feedback after commit.
+- [x] Implement Complete on another date with date validation and duplicate handling.
+- [x] Add per-completion Undo feedback lasting about 10 seconds; undo targets the exact inserted entry.
+- [x] Build the detail panel with newest-first history, date correction, confirmed deletion, and task editing/deletion.
+- [x] Recompute and refresh list/detail after every history mutation; prevent nested completion actions from opening the detail panel.
+- [x] Test double-click/retry behavior, backdating older/newer records, deleting the latest/all history, undo after another completion, and failed writes.
+- [x] Add a small set of UI integration tests for Done, backdate, Undo, and error feedback.
 
 Exit: completion history is the single source of truth, and mistakes are easy to correct.
 

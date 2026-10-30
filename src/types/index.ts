@@ -27,3 +27,4 @@ export type TaskInput = {
 };
 export type TaskList = { asOfDate: string; tasks: Task[] };
 export type Display = 'relative' | 'date';
+export type Completion = { id: number; taskId: number; completedOn: string };

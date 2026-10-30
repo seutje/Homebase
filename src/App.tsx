@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ConfirmProvider } from './components/Dialog';
 import { TaskForm } from './features/tasks/TaskForm';
 import { CategoryManager } from './features/categories/CategoryManager';
@@ -6,6 +6,12 @@ import { Settings } from './features/settings/Settings';
 import { useHomebase } from './lib/useHomebase';
 import { dueLabel, fullDate, lastDone, recurrence } from './lib/format';
 import type { Status, Task } from './types';
+import { api, errorMessage } from './lib/api';
+import { TaskDetail } from './features/tasks/TaskDetail';
+import { DateForm } from './features/tasks/DateForm';
+import { CompletionActions } from './features/tasks/CompletionActions';
+import { useToasts } from './lib/useToasts';
+import { Toasts } from './components/Toasts';
 
 export default function App() {
   return (
@@ -15,13 +21,52 @@ export default function App() {
   );
 }
 function Homebase() {
-  const { data, categories, display, error, loading, refresh } = useHomebase();
+  const { data, categories, display, error, setError, loading, refresh } =
+    useHomebase();
+  const [selected, setSelected] = useState<number | null>(null);
+  const [backdate, setBackdate] = useState<Task | null>(null);
+  const [pending, setPending] = useState<number[]>([]);
+  const locks = useRef(new Set<number>());
+  const { toasts, notify, remove } = useToasts();
   const [category, setCategory] = useState<number | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
   const [form, setForm] = useState<Task | 'new' | null>(null);
   const [manageCategories, setManageCategories] = useState(false);
   const [settings, setSettings] = useState(false);
   const tasks = data?.tasks ?? [];
+  const selectedTask = tasks.find((t) => t.id === selected);
+  const complete = async (task: Task, completedOn: string) => {
+    if (locks.current.has(task.id)) return;
+    locks.current.add(task.id);
+    setPending((ids) => [...ids, task.id]);
+    try {
+      const result = await api.record(task.id, completedOn);
+      await refresh();
+      if (result.inserted)
+        notify(
+          `${task.title} completed ${completedOn === data?.asOfDate ? 'today' : `on ${fullDate(completedOn)}`}`,
+          async () => {
+            try {
+              await api.deleteCompletion(result.id);
+              await refresh();
+            } catch (e) {
+              setError(errorMessage(e));
+              throw e;
+            }
+          },
+        );
+      else notify('Already recorded on that date.');
+    } catch (e) {
+      setError(errorMessage(e));
+      throw e;
+    } finally {
+      locks.current.delete(task.id);
+      setPending((ids) => ids.filter((id) => id !== task.id));
+    }
+  };
+  const done = (task: Task) => {
+    if (data) void complete(task, data.asOfDate).catch(() => {});
+  };
   const activeCategory = categories.find((c) => c.id === category);
   const categoryTasks = activeCategory
     ? tasks.filter((t) => t.categoryId === category)
@@ -47,25 +92,27 @@ function Homebase() {
           All tasks <span>{tasks.length}</span>
         </button>
         <p className="eyebrow category-heading">CATEGORIES</p>
-        {categories.map((c) => (
+        <div className="category-scroll">
+          {categories.map((c) => (
+            <button
+              key={c.id}
+              className={`nav-item ${category === c.id ? 'selected' : ''}`}
+              onClick={() => {
+                setCategory(c.id);
+                setStatus(null);
+              }}
+            >
+              {c.name}
+              <span>{tasks.filter((t) => t.categoryId === c.id).length}</span>
+            </button>
+          ))}
           <button
-            key={c.id}
-            className={`nav-item ${category === c.id ? 'selected' : ''}`}
-            onClick={() => {
-              setCategory(c.id);
-              setStatus(null);
-            }}
+            className="nav-item subtle"
+            onClick={() => setManageCategories(true)}
           >
-            {c.name}
-            <span>{tasks.filter((t) => t.categoryId === c.id).length}</span>
+            + Manage categories
           </button>
-        ))}
-        <button
-          className="nav-item subtle"
-          onClick={() => setManageCategories(true)}
-        >
-          + Manage categories
-        </button>
+        </div>
         <div className="sidebar-bottom">
           <button className="nav-item" onClick={() => setSettings(true)}>
             ⚙ Settings
@@ -163,7 +210,10 @@ function Homebase() {
             </div>
             {visible.map((task) => (
               <article key={task.id} className={`task-row ${task.status}`}>
-                <button className="task-title" onClick={() => setForm(task)}>
+                <button
+                  className="task-title"
+                  onClick={() => setSelected(task.id)}
+                >
                   <strong>{task.title}</strong>
                   <span>
                     {recurrence(task.schedule)} · {task.categoryName}
@@ -180,17 +230,39 @@ function Homebase() {
                   <strong>{lastDone(task, display)}</strong>
                   <span>{dueLabel(task)}</span>
                 </div>
-                <button
-                  disabled
-                  title="Completion controls arrive in the next phase"
-                >
-                  Done
-                </button>
+                <CompletionActions
+                  busy={pending.includes(task.id)}
+                  onDone={() => done(task)}
+                  onBackdate={() => setBackdate(task)}
+                />
               </article>
             ))}
           </div>
         )}
       </main>
+      {selectedTask && data && (
+        <TaskDetail
+          key={selectedTask.id}
+          task={selectedTask}
+          display={display}
+          today={data.asOfDate}
+          busy={pending.includes(selectedTask.id)}
+          onDone={() => done(selectedTask)}
+          onBackdate={() => setBackdate(selectedTask)}
+          onEdit={() => setForm(selectedTask)}
+          onClose={() => setSelected(null)}
+          onChanged={refresh}
+        />
+      )}
+      {backdate && data && (
+        <DateForm
+          title={`Complete ${backdate.title}`}
+          date={data.asOfDate}
+          today={data.asOfDate}
+          onSave={(value) => complete(backdate, value)}
+          onClose={() => setBackdate(null)}
+        />
+      )}
       {form && data && (
         <TaskForm
           task={form === 'new' ? undefined : form}
@@ -214,6 +286,7 @@ function Homebase() {
           onClose={() => setSettings(false)}
         />
       )}
+      <Toasts toasts={toasts} remove={remove} />
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import type { Display, Schedule, Task } from '../types';
 
 // Construct a local calendar date for formatting only; domain math is native.
-export function fullDate(value: string): string {
+export function fullDate(value: string, includeWeekday = false): string {
   const [year, month, day] = value.split('-').map(Number);
   const date = new Date(0);
   date.setFullYear(year, month - 1, day);
   date.setHours(12, 0, 0, 0);
   return date.toLocaleDateString(undefined, {
+    ...(includeWeekday ? { weekday: 'long' as const } : {}),
     month: 'long',
     day: 'numeric',
     year: 'numeric',
