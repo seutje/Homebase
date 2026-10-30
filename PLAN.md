@@ -111,3 +111,13 @@ Exit: seasonal chores become relevant at the appropriate time without fabricated
 - [x] Verify combined search/category/status behavior, never-completed ordering, notes persistence, and rejected invalid URL schemes.
 
 Exit: the extended app remains easy to scan and maintains the always-visible completion information.
+
+## Phase 10 — Tag releases and signed automatic updates (complete)
+
+- [x] Add a tag-triggered Windows workflow that checks version consistency, tests, builds a signed NSIS installer, uploads updater metadata, and publishes the completed release.
+- [x] Generate a Homebase-specific encrypted signing key outside Git and configure the public verification key and GitHub endpoint.
+- [x] Add automatic startup/periodic checks, manual Settings checks, installation progress, and recoverable offline/error behavior.
+- [x] Verify release-tag guards, updater lifecycle/UI behavior, native compilation, and a locally signed installer.
+- [x] Document the signing-key location, GitHub secret bootstrap, local builds, and tag publishing; commit the completed phase.
+
+GitHub bootstrap: repository secrets must be configured by the user through Settings or `npm run release:secrets` with authenticated GitHub CLI. The connected GitHub tools do not expose secret management. No tag is pushed or release published as part of local verification.

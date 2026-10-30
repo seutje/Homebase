@@ -12,11 +12,13 @@ export function Dialog({
   children,
   onClose,
   wide = false,
+  canClose = true,
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
   wide?: boolean;
+  canClose?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -36,6 +38,7 @@ export function Dialog({
         <button
           className="icon-button"
           aria-label="Close dialog"
+          disabled={!canClose}
           onClick={onClose}
         >
           ×

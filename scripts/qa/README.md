@@ -90,3 +90,20 @@ installed release, then deleted only their owned QA task. The packaged console
 had zero errors/warnings. The temporary installation was uninstalled, leaving
 the database unchanged by the uninstall operation. These release scripts use
 the normal app data directory deliberately, just like the v1 release scripts.
+
+## Signed updates
+
+Run `scripts/qa/updates.js` through the same Playwright CLI `run-code --filename`
+command against the debug WebView. This checks manual offline failure/retry,
+available updates, Later/resource cleanup, rediscovery, explicit installation,
+40% download progress, failed verification recovery, and the up-to-date state.
+Only updater IPC responses are mocked; task storage remains native. This does
+not start an installer or require a published release.
+
+The updater phase passed 12 frontend tests, 26 native tests, and two release
+version-guard tests. `npm run release:build` produced a signed v0.2.0 NSIS
+installer. The `verify_update` Rust example accepted its signature against the
+embedded public key and rejected a copy with one altered byte. Playwright CLI
+checks passed in the real Tauri WebView; progress and Settings screenshots were
+inspected. A remote GitHub workflow and a complete published-version upgrade
+remain unexercised until signing secrets are configured and a tag is pushed.

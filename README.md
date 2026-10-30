@@ -20,8 +20,10 @@ Restore validates a staged copy and retains your previous data in the `backups`
 subfolder before applying it. Schemas 1–4 are supported (older ones migrate in
 staging); newer-schema files are rejected. Keep occasional exported copies somewhere safe.
 
-The app runs offline, with no account, background service, or notifications.
-Closing the window exits.
+Tasks work offline, with no account, background service, or notifications.
+Release builds check GitHub for updates shortly after startup and every six hours
+while open. An available update offers Install or Later; installation only starts
+when requested. Settings also has a manual check. Closing the window exits.
 
 ## V2 features (v0.2.0)
 
@@ -80,4 +82,54 @@ snooze expiry/Undo, urgency overrides, link validation, and forward migrations.
 
 Native picker path selection is stubbed in the backup UI workflow because the
 picker is outside the WebView; the real SQLite export and restore commands run.
-No automatic updater or signing pipeline is configured.
+
+## Releases and automatic updates
+
+The Git origin is `git@github.com:seutje/Homebase.git`. Pushing a stable version
+tag such as `v0.2.0` runs `.github/workflows/release.yml`. It checks that the tag,
+npm manifests/lockfile, Cargo manifest/lockfile, and Tauri configuration agree,
+runs tests, builds the Windows NSIS installer, and creates a draft release. It
+verifies the installer signature against the public key embedded in Homebase
+before publishing the completed release with its installer, signature, and
+`latest.json` updater metadata to [GitHub Releases](https://github.com/seutje/Homebase/releases).
+
+The Homebase signing files are outside the repository:
+
+- Private key: `C:\Users\seutj\.tauri\homebase-updater.key`
+- Key password: `C:\Users\seutj\.tauri\homebase-updater.key.password`
+- Public key: `C:\Users\seutj\.tauri\homebase-updater.key.pub`
+
+The private key is encrypted; Windows permissions on it and its password file
+are restricted to the current user and SYSTEM. Keep both files backed up together
+somewhere private. The public verification key is embedded in
+`src-tauri/tauri.conf.json`. Keep using this key for future releases so existing
+installations can verify them. These updater signatures are separate from
+Windows Authenticode publisher signing.
+
+Before the first tag, configure these two repository **Actions secrets** in
+[GitHub settings](https://github.com/seutje/Homebase/settings/secrets/actions):
+
+- `TAURI_SIGNING_PRIVATE_KEY`: the complete private-key file contents.
+- `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`: the password file contents.
+
+Alternatively, install GitHub CLI, run `gh auth login`, then run
+`npm run release:secrets`; the helper uploads the exact file contents through
+stdin without logging them. GitHub CLI is not installed on this computer, and
+the connected GitHub tools cannot manage secrets, so this bootstrap remains to
+be done. `GITHUB_TOKEN` is supplied automatically by Actions.
+
+```powershell
+npm run version:check -- v0.2.0
+npm run release:build  # local signed installer using the files above
+git push origin main
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+For subsequent releases, update all five version locations together before
+committing and tagging. No tag or release has been pushed during local setup.
+Install the first updater-enabled build manually; later versions use
+`https://github.com/seutje/Homebase/releases/latest/download/latest.json`.
+Downloads are verified before installation. Homebase closes while the Windows
+installer runs and retains its existing SQLite data. Offline checks fail quietly;
+manual checks and failed installations provide a retry message.

@@ -6,6 +6,10 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "typecheck": "tsc --noEmit",
+    "version:check": "node scripts/check-version.mjs",
+    "test:release": "node --test scripts/check-version.test.mjs",
+    "release:build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-release.ps1",
+    "release:secrets": "node scripts/configure-release-secrets.mjs",
     "build": "npm run typecheck && vite build",
     "lint": "eslint src --max-warnings 0",
     "format": "prettier --write src *.json *.ts *.js *.md",
@@ -17,6 +21,7 @@
   "dependencies": {
     "@tauri-apps/api": "2.12.4",
     "@tauri-apps/plugin-dialog": "2.8.4",
+    "@tauri-apps/plugin-updater": "2.13.3",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

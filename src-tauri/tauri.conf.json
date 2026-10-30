@@ -31,6 +31,18 @@
     ],
     "icon": [
       "icons/icon.ico"
-    ]
+    ],
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDZGQUMwM0ZERTcyRDY5NEEKUldSS2FTM24vUU9zYnozUnlrZUVoRnJ6YU1FcFZDU3VIby8vTjhWSXNVdFBGNkVJcExnRTI0REsK",
+      "endpoints": [
+        "https://github.com/seutje/Homebase/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

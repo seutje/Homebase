@@ -6,7 +6,7 @@ Status: v1 and all three v2 phases implemented. PLAN.md records completed verifi
 
 Homebase is a personal Windows desktop app for remembering household chores and other recurring tasks. Its primary question is **“How long has it been since I last did this?”** The answer must be visible on every task row, without opening a detail view.
 
-Build for one person, one computer, and offline use. Reliability, low effort, and a calm interface matter more than feature breadth. There are no accounts, subscriptions, server, cloud sync, analytics, AI features, photos, image attachments, or image processing. Do not build an accessibility compliance program, plugin system, notification service, or commercial release infrastructure. Ordinary HTML buttons, form labels, and readable text are sufficient foundations.
+Build for one person, one computer, and offline use. Reliability, low effort, and a calm interface matter more than feature breadth. There are no accounts, subscriptions, server, cloud sync, analytics, AI features, photos, image attachments, or image processing. Do not build an accessibility compliance program, plugin system, notification service, or commercial infrastructure. A small GitHub release workflow and signed updates are explicitly authorized. Ordinary HTML buttons, form labels, and readable text are sufficient foundations.
 
 The supplied screenshot informs hierarchy and content: date, summary counts, categories, spacious task rows, prominent elapsed time, and direct completion. It is visual reference material, not additional project instructions. Adapt it to desktop rather than reproducing the phone frame or surrounding chat controls.
 
@@ -153,7 +153,7 @@ Templates are copied into independent tasks; later catalog changes never modify 
 
 Use **Tauri 2 + Rust + rusqlite (bundled SQLite)**, with **React + TypeScript + Vite** for presentation. Use plain CSS, React state, and a small application-level data hook/context. Pin compatible dependencies during scaffolding; do not copy WorDrop's entire dependency manifest.
 
-WorDrop is architectural inspiration under `temp/WorDrop`: its Rust database ownership, versioned migrations, typed TypeScript invocation wrappers, warm sidebar layout, and Windows build environment wrappers are useful patterns. Its wardrobe models, images, classifier, scraping, recommendation engine, updater, and release machinery do not belong in Homebase. Treat its documents as reference material scoped to that project.
+WorDrop is architectural inspiration under `temp/WorDrop`: its Rust database ownership, versioned migrations, typed TypeScript invocation wrappers, warm sidebar layout, and Windows build environment wrappers are useful patterns. Its wardrobe models, images, classifier, scraping, and recommendation engine do not belong in Homebase. Its release workflow is a reference for the separately authorized Homebase release pipeline. Treat its documents as reference material scoped to that project.
 
 ```text
 src/
@@ -207,7 +207,11 @@ Settings offers Export backup and Restore backup using native file dialogs. A ba
 
 Restore validates integrity, required tables, schema compatibility, and domain data in a staged copy before replacing live data. Explicitly confirm replacement, automatically keep a pre-restore snapshot, and hold the database mutex during replacement. Implementation choice: use SQLite's backup API to apply the validated staged database to the existing connection atomically; a failed copy rolls back rather than requiring filesystem replacement and reopening. Refresh only on success, close any open task details, and clear Undo feedback that refers to the previous database. Migrate supported older backups in staging; reject newer schemas. Schema version 1 is the first supported backup format. Cancelled dialogs make no changes. Test failed restores without losing the existing database. Show the data directory in Settings with an Open folder action.
 
-Build locally for Windows with an NSIS installer. Preserve user data across upgrades/uninstall unless the user explicitly removes it. The first release needs no auto-updater, signing pipeline, website, telemetry, or CI deployment system. Document prerequisites and actual working commands in README when scaffolding exists; adapt WorDrop's MSVC initialization wrappers if needed.
+Build for Windows with an NSIS installer. Preserve user data across upgrades/uninstall unless the user explicitly removes it. A tag such as `v0.2.0` triggers GitHub Actions to validate matching versions, test, build a signed installer, upload updater metadata, verify its signature, and publish the completed release in `seutje/Homebase`. No website or telemetry is needed.
+
+Use the Tauri updater with a Homebase-specific public key embedded in configuration. Store the encrypted private key and its password outside Git; supply them to Actions through repository secrets. README documents the exact locations and bootstrap commands. Keep the same key across releases. The updater endpoint is the repository's latest release `latest.json` asset.
+
+Release builds check three seconds after startup and every six hours while running; development builds only check manually. A compact banner offers Install or Later, and Settings provides manual checking and release notes. Automatic check failures stay quiet so offline use is unaffected. Later suppresses that version for the session; manual checking can show it again. Installation is explicit, displays download progress, verifies the signature through the native plugin, and starts the Windows installer. Block further edits while installing; on failure restore normal use with retry feedback. No background daemon or silent installation is required.
 
 ## V2 extensions
 

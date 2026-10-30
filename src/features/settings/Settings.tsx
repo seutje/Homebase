@@ -6,15 +6,19 @@ import { localToday } from '../../lib/format';
 import type { Display, UrgencyDefaults } from '../../types';
 import { UrgencyFields } from '../../components/UrgencyFields';
 import packageInfo from '../../../package.json';
+import { UpdateSettings } from '../../components/AppUpdates';
+import type { AppUpdates } from '../../lib/useAppUpdates';
 
 export function Settings({
   display,
+  updates,
   urgency,
   onSaved,
   onRestored,
   onClose,
 }: {
   display: Display;
+  updates: AppUpdates;
   urgency: UrgencyDefaults;
   onSaved: () => Promise<void>;
   onRestored: () => Promise<void>;
@@ -168,6 +172,7 @@ export function Settings({
         </p>
       )}
       <div className="settings-about">
+        <UpdateSettings updates={updates} />
         <strong>Homebase · {packageInfo.version}</strong>
         <p>
           A little less to remember.

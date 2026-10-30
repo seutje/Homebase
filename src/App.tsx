@@ -14,6 +14,8 @@ import { useToasts } from './lib/useToasts';
 import { Toasts } from './components/Toasts';
 import { ChoreLibrary } from './features/library/ChoreLibrary';
 import { SnoozeForm } from './features/tasks/SnoozeForm';
+import { useAppUpdates } from './lib/useAppUpdates';
+import { UpdateBanner, UpdateProgress } from './components/AppUpdates';
 import {
   matchesSearch,
   sortTasks,
@@ -28,6 +30,7 @@ export default function App() {
   );
 }
 function Homebase() {
+  const updates = useAppUpdates();
   const { data, categories, display, error, setError, loading, refresh } =
     useHomebase();
   const [selected, setSelected] = useState<number | null>(null);
@@ -141,6 +144,7 @@ function Homebase() {
         </div>
       </aside>
       <main>
+        <UpdateBanner updates={updates} />
         <header className="page-header">
           <div>
             <p className="eyebrow">
@@ -393,6 +397,7 @@ function Homebase() {
       )}
       {settings && (
         <Settings
+          updates={updates}
           urgency={
             data?.urgencyDefaults ?? { comingUpDays: null, graceDays: 0 }
           }
@@ -412,6 +417,7 @@ function Homebase() {
         />
       )}
       <Toasts toasts={toasts} remove={remove} />
+      <UpdateProgress updates={updates} />
       {library && (
         <ChoreLibrary
           tasks={tasks}

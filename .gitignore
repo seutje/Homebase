@@ -9,3 +9,6 @@ temp/
 *.db-wal
 *.tsbuildinfo
 .qa/
+*.key
+*.key.pub
+*.key.password
