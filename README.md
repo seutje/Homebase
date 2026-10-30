@@ -70,6 +70,8 @@ npm run tauri build
 
 The local installer is generated in `src-tauri/target/release/bundle/nsis`.
 Development/build output and local data are excluded from Git.
+Git and Prettier use LF line endings, including Windows checkouts, so local and
+GitHub Actions formatting checks agree.
 
 ## UI verification
 
@@ -115,19 +117,20 @@ Before the first tag, configure these two repository **Actions secrets** in
 Alternatively, install GitHub CLI, run `gh auth login`, then run
 `npm run release:secrets`; the helper uploads the exact file contents through
 stdin without logging them. GitHub CLI is not installed on this computer, and
-the connected GitHub tools cannot manage secrets, so this bootstrap remains to
-be done. `GITHUB_TOKEN` is supplied automatically by Actions.
+the connected GitHub tools cannot manage secrets. `GITHUB_TOKEN` is supplied
+automatically by Actions.
 
 ```powershell
-npm run version:check -- v0.2.0
+npm run version:check -- v0.2.1
 npm run release:build  # local signed installer using the files above
 git push origin main
-git tag v0.2.0
-git push origin v0.2.0
+git tag v0.2.1
+git push origin v0.2.1
 ```
 
 For subsequent releases, update all five version locations together before
-committing and tagging. No tag or release has been pushed during local setup.
+committing and tagging. Published tags are kept intact; release corrections use
+a new patch version.
 Install the first updater-enabled build manually; later versions use
 `https://github.com/seutje/Homebase/releases/latest/download/latest.json`.
 Downloads are verified before installation. Homebase closes while the Windows

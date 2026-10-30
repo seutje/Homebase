@@ -121,3 +121,12 @@ Exit: the extended app remains easy to scan and maintains the always-visible com
 - [x] Document the signing-key location, GitHub secret bootstrap, local builds, and tag publishing; commit the completed phase.
 
 GitHub bootstrap: repository secrets must be configured by the user through Settings or `npm run release:secrets` with authenticated GitHub CLI. The connected GitHub tools do not expose secret management. No tag is pushed or release published as part of local verification.
+
+## Phase 11 — Windows release formatting fix (complete)
+
+- [x] Reproduce the LF/CRLF formatting mismatch reported by GitHub Actions.
+- [x] Enforce LF checkouts through Git attributes and explicit Prettier settings.
+- [x] Verify a fresh checkout with `core.autocrlf=true` and rerun relevant checks.
+- [x] Commit and publish the correction with a new `v0.2.1` tag.
+
+The v0.2.0 workflow failed its formatting step because Windows checkout defaults converted LF files to CRLF. The isolated checkout now passes the same `npm run format:check` command with `core.autocrlf=true`. Version manifests and lockfiles are synchronized at 0.2.1; the original tag is preserved.

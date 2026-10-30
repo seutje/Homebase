@@ -49,6 +49,8 @@ Work through PLAN.md in dependency order. Make changes that complete a coherent 
 
 Prefer the current checkout and established code patterns. Do not change unrelated files or commit generated builds, local databases, dependencies, or the reference project's output as part of implementation. Keep changes reviewable and avoid new infrastructure unless it solves an observed problem.
 
+Preserve the LF checkout policy in `.gitattributes` and Prettier configuration. Windows runners may default to `core.autocrlf=true`; verify formatting from a fresh checkout when changing release setup.
+
 When scaffolding, establish real npm and native test/build commands and document them in README. Do not claim an invented command was run. Inspect WorDrop's Windows wrappers before adapting them; initialize the MSVC/Windows SDK environment if native builds require it.
 
 ## Verification
