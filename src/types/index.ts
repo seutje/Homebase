@@ -27,4 +27,10 @@ export type TaskInput = {
 };
 export type TaskList = { asOfDate: string; tasks: Task[] };
 export type Display = 'relative' | 'date';
+export type TemplateSelection = {
+  key: string;
+  value: number;
+  unit: 'days' | 'weeks' | 'months';
+  allowDuplicate: boolean;
+};
 export type Completion = { id: number; taskId: number; completedOn: string };

@@ -12,6 +12,7 @@ import { DateForm } from './features/tasks/DateForm';
 import { CompletionActions } from './features/tasks/CompletionActions';
 import { useToasts } from './lib/useToasts';
 import { Toasts } from './components/Toasts';
+import { ChoreLibrary } from './features/library/ChoreLibrary';
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ function Homebase() {
   const [form, setForm] = useState<Task | 'new' | null>(null);
   const [manageCategories, setManageCategories] = useState(false);
   const [settings, setSettings] = useState(false);
+  const [library, setLibrary] = useState(false);
   const tasks = data?.tasks ?? [];
   const selectedTask = tasks.find((t) => t.id === selected);
   const complete = async (task: Task, completedOn: string) => {
@@ -124,7 +126,7 @@ function Homebase() {
         <header className="page-header">
           <div>
             <p className="eyebrow">
-              {data ? fullDate(data.asOfDate) : 'YOUR DAILY OVERVIEW'}
+              {data ? fullDate(data.asOfDate, true) : 'YOUR DAILY OVERVIEW'}
             </p>
             <h1>{activeCategory?.name ?? 'All tasks'}</h1>
           </div>
@@ -168,6 +170,15 @@ function Homebase() {
               ? `Showing ${visible.length} of ${tasks.length}`
               : `${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'} · A little less to remember.`}
           </p>
+          {!filtered && (
+            <button
+              className="text-button"
+              disabled={!data}
+              onClick={() => setLibrary(true)}
+            >
+              Browse suggested chores
+            </button>
+          )}
           {filtered && (
             <button
               className="text-button"
@@ -200,6 +211,15 @@ function Homebase() {
             <button onClick={() => setForm('new')} disabled={!data}>
               + Add your first task
             </button>
+            {tasks.length === 0 && (
+              <button
+                className="library-start"
+                disabled={!data}
+                onClick={() => setLibrary(true)}
+              >
+                Browse suggested chores
+              </button>
+            )}
           </section>
         ) : (
           <div className="task-list">
@@ -287,6 +307,13 @@ function Homebase() {
         />
       )}
       <Toasts toasts={toasts} remove={remove} />
+      {library && (
+        <ChoreLibrary
+          tasks={tasks}
+          onSaved={refresh}
+          onClose={() => setLibrary(false)}
+        />
+      )}
     </div>
   );
 }

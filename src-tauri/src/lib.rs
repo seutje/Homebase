@@ -2,6 +2,7 @@ mod categories;
 mod completions;
 mod database;
 mod error;
+mod library;
 mod schedule;
 mod settings;
 mod state;
@@ -67,6 +68,11 @@ fn delete_completion(store: State<Store>, id: i64) -> Result<()> {
     store.with(|c| completions::delete(c, id, chrono::Local::now().date_naive()))
 }
 
+#[tauri::command]
+fn add_templates(store: State<Store>, selected: Vec<library::Selection>) -> Result<Vec<i64>> {
+    store.with(|c| library::add(c, selected, chrono::Local::now().date_naive()))
+}
+
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -81,7 +87,8 @@ pub fn run() {
             list_completions,
             record_completion,
             update_completion,
-            delete_completion
+            delete_completion,
+            add_templates
         ])
         .setup(|app| {
             // A debug-only isolated data directory keeps UI checks out of personal data.

@@ -62,11 +62,11 @@ Exit: completion history is the single source of truth, and mistakes are easy to
 
 ## Phase 5 — Suggested chore library
 
-- [ ] Curate roughly 20–30 editable starting suggestions across household categories in a bundled JSON file.
-- [ ] Implement the picker with category browsing, multi-selection, and interval customization before adding.
-- [ ] Copy templates into independent tasks; match/create categories as needed and warn about previously added templates.
-- [ ] Add selected templates transactionally; keep the first-launch list empty until the user chooses chores.
-- [ ] Verify duplicate-template confirmation, renamed categories, customization, and unchanged existing tasks after catalog edits.
+- [x] Curate roughly 20–30 editable starting suggestions across household categories in a bundled JSON file.
+- [x] Implement the picker with category browsing, multi-selection, and interval customization before adding.
+- [x] Copy templates into independent tasks; match/create categories as needed and warn about previously added templates.
+- [x] Add selected templates transactionally; keep the first-launch list empty until the user chooses chores.
+- [x] Verify duplicate-template confirmation, renamed categories, customization, and unchanged existing tasks after catalog edits.
 
 Exit: the user can quickly populate a useful list without false completion dates or prescribed care advice.
 

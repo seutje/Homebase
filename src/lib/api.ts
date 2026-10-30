@@ -5,9 +5,12 @@ import type {
   TaskInput,
   TaskList,
   Completion,
+  TemplateSelection,
 } from '../types';
 
 export const api = {
+  addTemplates: (selected: TemplateSelection[]) =>
+    invoke<number[]>('add_templates', { selected }),
   history: (taskId: number) =>
     invoke<Completion[]>('list_completions', { taskId }),
   record: (taskId: number, completedOn: string) =>

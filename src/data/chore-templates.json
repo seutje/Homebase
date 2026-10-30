@@ -1,0 +1,210 @@
+[
+  {
+    "key": "wash-bedsheets",
+    "name": "Wash bedsheets",
+    "category": "Laundry",
+    "value": 1,
+    "unit": "weeks",
+    "suggestion": "Adjust to suit your household and bedding."
+  },
+  {
+    "key": "wash-towels",
+    "name": "Wash towels",
+    "category": "Laundry",
+    "value": 1,
+    "unit": "weeks",
+    "suggestion": "A starting point for your usual towel rotation."
+  },
+  {
+    "key": "clean-washer",
+    "name": "Clean washing machine",
+    "category": "Laundry",
+    "value": 1,
+    "unit": "months",
+    "suggestion": "Use the cleaning method and interval in your machine manual."
+  },
+  {
+    "key": "sort-laundry",
+    "name": "Sort laundry",
+    "category": "Laundry",
+    "value": 3,
+    "unit": "days",
+    "suggestion": "Pick a rhythm that keeps the laundry basket manageable."
+  },
+  {
+    "key": "wipe-counters",
+    "name": "Wipe kitchen surfaces",
+    "category": "Kitchen",
+    "value": 1,
+    "unit": "days",
+    "suggestion": "Fit this around your cooking routine."
+  },
+  {
+    "key": "clean-dishwasher",
+    "name": "Clean dishwasher",
+    "category": "Kitchen",
+    "value": 1,
+    "unit": "months",
+    "suggestion": "Check the manual for the appropriate cleaning procedure."
+  },
+  {
+    "key": "clean-fridge",
+    "name": "Clean refrigerator shelves",
+    "category": "Kitchen",
+    "value": 1,
+    "unit": "months",
+    "suggestion": "Adjust to how quickly your fridge needs attention."
+  },
+  {
+    "key": "wipe-microwave",
+    "name": "Wipe microwave",
+    "category": "Kitchen",
+    "value": 1,
+    "unit": "weeks",
+    "suggestion": "A small regular clean can be easier to remember."
+  },
+  {
+    "key": "clean-oven",
+    "name": "Clean oven",
+    "category": "Kitchen",
+    "value": 3,
+    "unit": "months",
+    "suggestion": "Follow your oven manufacturer’s instructions."
+  },
+  {
+    "key": "clean-bathroom",
+    "name": "Clean bathroom surfaces",
+    "category": "Bathrooms",
+    "value": 1,
+    "unit": "weeks",
+    "suggestion": "Adjust this general starting point to your household."
+  },
+  {
+    "key": "clean-toilet",
+    "name": "Clean toilet",
+    "category": "Bathrooms",
+    "value": 1,
+    "unit": "weeks",
+    "suggestion": "Choose your preferred cleaning rhythm."
+  },
+  {
+    "key": "clean-shower",
+    "name": "Clean shower",
+    "category": "Bathrooms",
+    "value": 1,
+    "unit": "weeks",
+    "suggestion": "Use methods appropriate for your shower materials."
+  },
+  {
+    "key": "wash-bathmat",
+    "name": "Wash bathmat",
+    "category": "Bathrooms",
+    "value": 2,
+    "unit": "weeks",
+    "suggestion": "Check the care label before washing."
+  },
+  {
+    "key": "vacuum-floors",
+    "name": "Vacuum floors",
+    "category": "General Cleaning",
+    "value": 1,
+    "unit": "weeks",
+    "suggestion": "Change the interval for pets, traffic, and flooring."
+  },
+  {
+    "key": "mop-floors",
+    "name": "Mop floors",
+    "category": "General Cleaning",
+    "value": 2,
+    "unit": "weeks",
+    "suggestion": "Use a method suitable for your flooring."
+  },
+  {
+    "key": "dust-surfaces",
+    "name": "Dust surfaces",
+    "category": "General Cleaning",
+    "value": 2,
+    "unit": "weeks",
+    "suggestion": "Adjust for your rooms and routine."
+  },
+  {
+    "key": "clean-windows",
+    "name": "Clean windows",
+    "category": "General Cleaning",
+    "value": 3,
+    "unit": "months",
+    "suggestion": "A flexible starting point for indoor windows."
+  },
+  {
+    "key": "wipe-switches",
+    "name": "Wipe handles and switches",
+    "category": "General Cleaning",
+    "value": 1,
+    "unit": "months",
+    "suggestion": "Use suitable products for the surfaces."
+  },
+  {
+    "key": "maintenance-review",
+    "name": "Review home maintenance checklist",
+    "category": "Home Maintenance",
+    "value": 6,
+    "unit": "months",
+    "suggestion": "Use equipment manuals to set individual maintenance intervals."
+  },
+  {
+    "key": "check-vacuum",
+    "name": "Check vacuum filter",
+    "category": "Home Maintenance",
+    "value": 1,
+    "unit": "months",
+    "suggestion": "Check the manufacturer’s maintenance instructions."
+  },
+  {
+    "key": "review-supplies",
+    "name": "Review cleaning supplies",
+    "category": "Home Maintenance",
+    "value": 1,
+    "unit": "months",
+    "suggestion": "Restock what you actually use."
+  },
+  {
+    "key": "sort-paperwork",
+    "name": "Sort household paperwork",
+    "category": "Life Admin",
+    "value": 1,
+    "unit": "months",
+    "suggestion": "A short recurring admin session."
+  },
+  {
+    "key": "review-calendar",
+    "name": "Review upcoming household dates",
+    "category": "Life Admin",
+    "value": 1,
+    "unit": "weeks",
+    "suggestion": "Check appointments, renewals, and things to prepare."
+  },
+  {
+    "key": "review-backups",
+    "name": "Review personal backups",
+    "category": "Life Admin",
+    "value": 1,
+    "unit": "months",
+    "suggestion": "Check that important personal files have a usable backup."
+  },
+  {
+    "key": "personal-supplies",
+    "name": "Review personal-care supplies",
+    "category": "Personal Care",
+    "value": 1,
+    "unit": "months",
+    "suggestion": "Set your own shopping rhythm; this is not a care schedule."
+  },
+  {
+    "key": "dog-supplies",
+    "name": "Review dog-care supplies",
+    "category": "Dog Care",
+    "value": 1,
+    "unit": "months",
+    "suggestion": "Check food and other supplies; choose care intervals separately."
+  }
+]
