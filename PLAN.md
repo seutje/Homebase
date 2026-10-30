@@ -140,3 +140,5 @@ The v0.2.0 workflow failed its formatting step because Windows checkout defaults
 All 12 frontend tests, lint, formatting, and the production build passed. Playwright CLI verified Today/Yesterday/older/never-completed labels, task details, and calendar mode against the native app at 1180px and 900px. Task rows grow with wrapped labels; keep the abbreviated day and month together.
 
 Follow-up: disable emergency word wrapping on completion labels so the nonbreaking space between day and month also prevents the parenthesized date from splitting on narrow rows.
+
+Release: package the completion-date changes as v0.2.2, synchronizing npm/Cargo/Tauri manifests and lockfiles. Preserve published v0.2.1; push the new tag to run the signed release workflow.
