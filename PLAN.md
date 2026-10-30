@@ -22,14 +22,14 @@ Exit: a real desktop window runs locally with no copied wardrobe features or run
 
 ## Phase 2 — SQLite and recurrence engine
 
-- [ ] Create the app-data database and transactional versioned migration runner; enable foreign keys and refuse newer schemas.
-- [ ] Add categories, tasks, completions, and settings tables with constraints and useful indexes.
-- [ ] Seed default categories once, including protected Uncategorized; do not seed tasks or history.
-- [ ] Implement date-only parsing, elapsed days, relative day/week/month intervals, and month-end clamping in pure Rust functions.
-- [ ] Implement every-weekday schedules, future tracking starts, never-completed behavior, and persistent overdue occurrences.
-- [ ] Implement derived status, coming-up windows, and stable default ordering; return an as-of date with list results.
-- [ ] Add focused Rust tests for the concrete DESIGN.md examples, leap years, month ends, early/late weekly completion, and DST calendar-day behavior.
-- [ ] Test fresh startup, migration rollback, newer-schema refusal, and persistence after reopening the database.
+- [x] Create the app-data database and transactional versioned migration runner; enable foreign keys and refuse newer schemas.
+- [x] Add categories, tasks, completions, and settings tables with constraints and useful indexes.
+- [x] Seed default categories once, including protected Uncategorized; do not seed tasks or history.
+- [x] Implement date-only parsing, elapsed days, relative day/week/month intervals, and month-end clamping in pure Rust functions.
+- [x] Implement every-weekday schedules, future tracking starts, never-completed behavior, and persistent overdue occurrences.
+- [x] Implement derived status, coming-up windows, and stable default ordering; return an as-of date with list results.
+- [x] Add focused Rust tests for the concrete DESIGN.md examples, leap years, month ends, early/late weekly completion, and DST calendar-day behavior.
+- [x] Test fresh startup, migration rollback, newer-schema refusal, and persistence after reopening the database.
 
 Exit: recurrence rules and initial storage work without the UI and pass deterministic tests.
 
