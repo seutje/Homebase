@@ -311,7 +311,7 @@ button.icon-button {
   font-weight: 600;
   letter-spacing: -0.6px;
   margin-bottom: 5px;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
 }
 .attention .completion-value strong {
   color: var(--rust);
