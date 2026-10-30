@@ -32,7 +32,7 @@ async (page) => {
   await page.getByRole('searchbox',{name:'Search',exact:true}).fill('HM-42');
   await page.getByText('Nothing here right now.',{exact:true}).waitFor();
   await page.getByRole('checkbox',{name:'Include notes',exact:true}).check();
-  await row.getByText('9 days ago',{exact:true}).waitFor();
+  await row.getByText(/^9 days ago \(\d+\s.+\)$/).waitFor();
   await page.getByRole('button',{name:'Laundry 1',exact:true}).click();
   await page.getByRole('button',{name:'1 Needs attention',exact:true}).click();
   if(await page.locator('.task-row').count()!==1) throw new Error('Combined filters failed');

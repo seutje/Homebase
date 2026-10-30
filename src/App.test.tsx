@@ -60,19 +60,19 @@ describe('completion workflows', () => {
     const user = userEvent.setup();
     task.notes = 'Use Affresh tablet';
     render(<App />);
-    await screen.findByText('9 days ago');
+    await screen.findByText(/^9 days ago \(21\s.+\)$/);
     await user.type(
       screen.getByRole('searchbox', { name: 'Search' }),
       'affresh',
     );
     await screen.findByText('Nothing here right now.');
     await user.click(screen.getByRole('checkbox', { name: 'Include notes' }));
-    await screen.findByText('9 days ago');
+    await screen.findByText(/^9 days ago \(21\s.+\)$/);
     await user.click(screen.getByRole('button', { name: /Laundry\s*1/ }));
     await user.click(
       screen.getByRole('button', { name: /1\s*Needs attention/ }),
     );
-    expect(screen.getByText('9 days ago')).toBeVisible();
+    expect(screen.getByText(/^9 days ago \(21\s.+\)$/)).toBeVisible();
     await user.click(screen.getByRole('button', { name: 'Clear filters' }));
     expect(screen.getByRole('searchbox', { name: 'Search' })).toHaveValue('');
   });
@@ -87,16 +87,16 @@ describe('completion workflows', () => {
       };
     });
     render(<App />);
-    await screen.findByText('9 days ago');
+    await screen.findByText(/^9 days ago \(21\s.+\)$/);
     await user.click(screen.getByRole('button', { name: /^Snooze$/ }));
     fireEvent.change(screen.getByLabelText('Snooze until'), {
       target: { value: '2026-11-03' },
     });
     await user.click(screen.getByRole('button', { name: 'Snooze task' }));
     await screen.findByText(/Snoozed until/);
-    expect(screen.getByText('9 days ago')).toBeVisible();
+    expect(screen.getByText(/^9 days ago \(21\s.+\)$/)).toBeVisible();
     await user.click(screen.getByRole('button', { name: 'Snoozed · 1' }));
-    expect(screen.getByText('9 days ago')).toBeVisible();
+    expect(screen.getByText(/^9 days ago \(21\s.+\)$/)).toBeVisible();
     expect(
       screen.getByRole('button', { name: /0\s*Needs attention/ }),
     ).toBeVisible();
@@ -125,12 +125,12 @@ describe('completion workflows', () => {
         };
       });
     render(<App />);
-    await screen.findByText('9 days ago');
+    await screen.findByText(/^9 days ago \(21\s.+\)$/);
     await user.click(screen.getByRole('button', { name: /^Done$/ }));
-    await screen.findByText('Today', { exact: true });
+    await screen.findByText(/^Today \(30\s.+\)$/);
     expect(record).toHaveBeenCalledWith(3, '2026-10-30');
     await user.click(screen.getByRole('button', { name: /^Undo$/ }));
-    await screen.findByText('9 days ago');
+    await screen.findByText(/^9 days ago \(21\s.+\)$/);
     expect(remove).toHaveBeenCalledWith(81);
   });
   it('sends a backdated date without opening the detail panel; duplicates offer no undo', async () => {
@@ -139,7 +139,7 @@ describe('completion workflows', () => {
       .spyOn(api, 'record')
       .mockResolvedValue({ id: 71, inserted: false });
     render(<App />);
-    await screen.findByText('9 days ago');
+    await screen.findByText(/^9 days ago \(21\s.+\)$/);
     await user.click(
       screen.getByRole('button', { name: 'Complete on another date' }),
     );
@@ -158,11 +158,11 @@ describe('completion workflows', () => {
       message: 'Disk is full. Free some space and retry.',
     });
     render(<App />);
-    await screen.findByText('9 days ago');
+    await screen.findByText(/^9 days ago \(21\s.+\)$/);
     await user.click(screen.getByRole('button', { name: /^Done$/ }));
     await screen.findByRole('alert');
-    expect(screen.getByText('9 days ago')).toBeVisible();
-    expect(screen.queryByText('Today', { exact: true })).toBeNull();
+    expect(screen.getByText(/^9 days ago \(21\s.+\)$/)).toBeVisible();
+    expect(screen.queryByText(/^Today \(30\s.+\)$/)).toBeNull();
     await waitFor(() =>
       expect(screen.getByRole('button', { name: /^Done$/ })).toBeEnabled(),
     );

@@ -130,3 +130,11 @@ GitHub bootstrap: repository secrets must be configured by the user through Sett
 - [x] Commit and publish the correction with a new `v0.2.1` tag.
 
 The v0.2.0 workflow failed its formatting step because Windows checkout defaults converted LF files to CRLF. The isolated checkout now passes the same `npm run format:check` command with `core.autocrlf=true`. Version manifests and lockfiles are synchronized at 0.2.1; the original tag is preserved.
+
+## Phase 12 — Completion date beside elapsed time
+
+- [x] Append the completion day and abbreviated localized month to Today, Yesterday, and days-ago labels in the shared list/detail formatter.
+- [x] Update the display-setting example and design documentation.
+- [x] Verify completion workflows and inspect ordinary/minimum-width layouts; commit the change.
+
+All 12 frontend tests, lint, formatting, and the production build passed. Playwright CLI verified Today/Yesterday/older/never-completed labels, task details, and calendar mode against the native app at 1180px and 900px. Task rows grow with wrapped labels; keep the abbreviated day and month together.

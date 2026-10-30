@@ -10,7 +10,7 @@ async (page) => {
   await row.getByRole('button',{name:'Snooze',exact:true}).click();
   await page.getByLabel('Snooze until').fill('2026-11-03');
   await page.getByRole('button',{name:'Snooze task',exact:true}).click();
-  await row.getByText('9 days ago',{exact:true}).waitFor();
+  await row.getByText(/^9 days ago \(\d+\s.+\)$/).waitFor();
   await row.getByText(/Snoozed until/).waitFor();
   await page.getByRole('button',{name:'0 Needs attention',exact:true}).waitFor();
   await page.getByRole('button',{name:'Snoozed · 1',exact:true}).click();

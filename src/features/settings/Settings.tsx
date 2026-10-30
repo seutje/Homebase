@@ -67,7 +67,9 @@ export function Settings({
             })
           }
         >
-          <option value="relative">Days ago — 9 days ago</option>
+          <option value="relative">
+            Days ago with date — 9 days ago (21 Oct)
+          </option>
           <option value="date">Calendar date — October 21, 2026</option>
         </select>
       </label>

@@ -480,6 +480,7 @@ main > :not(.task-list) {
   overflow-y: auto;
   min-height: 0;
   align-content: start;
+  grid-auto-rows: max-content;
 }
 .list-head {
   position: sticky;

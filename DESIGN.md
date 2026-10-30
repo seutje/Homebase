@@ -48,7 +48,7 @@ The illustrative numbers above are not seeded data. Use “Needs attention” as
 ### Task row
 
 1. Task title, with a secondary line for recurrence and category.
-2. A dedicated, visually strong last-completed value: `9 days ago` by default. A global setting switches to `October 21, 2026`; the label stays visible in either mode. Use `Today`, `Yesterday`, and `Never completed` where appropriate. Show the exact date in details and a tooltip in relative mode.
+2. A dedicated, visually strong last-completed value: `9 days ago (21 Oct)` by default. Relative labels always append the completion day and abbreviated month, using the system's month language (for example `Today (30 Okt)`). A global setting switches to `October 21, 2026`; the label stays visible in either mode. Use `Today`, `Yesterday`, and `Never completed` where appropriate; never-completed tasks have no date suffix. Show the full date in details and a tooltip in relative mode.
 3. A secondary status such as `2 days overdue`, `Due today`, or `Due in 8 days`. The completion value remains distinct from this due-date information.
 4. A labelled Done button and an adjacent small dropdown for `Complete on another date…`. Clicking the title or row body opens details; these actions must not also trigger row navigation.
 

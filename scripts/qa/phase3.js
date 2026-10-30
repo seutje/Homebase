@@ -7,7 +7,7 @@ async (page) => {
   await page.getByLabel('Last completed').fill('2026-10-21');
   await page.getByRole('button', { name: 'Save task', exact: true }).click();
   await page.getByRole('dialog').waitFor({ state: 'hidden' });
-  await page.getByText('9 days ago', { exact: true }).waitFor();
+  await page.getByText(/^9 days ago \(\d+\s.+\)$/).waitFor();
   await page.getByText('2 days overdue', { exact: true }).waitFor();
   await page.getByRole('button', { name: '+ Manage categories' }).click();
   await page.getByLabel('New category').fill('Garden');

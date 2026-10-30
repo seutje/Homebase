@@ -1,11 +1,15 @@
 import type { Display, Schedule, Task } from '../types';
 
 // Construct a local calendar date for formatting only; domain math is native.
-export function fullDate(value: string, includeWeekday = false): string {
+function calendarDate(value: string): Date {
   const [year, month, day] = value.split('-').map(Number);
   const date = new Date(0);
   date.setFullYear(year, month - 1, day);
   date.setHours(12, 0, 0, 0);
+  return date;
+}
+export function fullDate(value: string, includeWeekday = false): string {
+  const date = calendarDate(value);
   return date.toLocaleDateString(undefined, {
     ...(includeWeekday ? { weekday: 'long' as const } : {}),
     month: 'long',
@@ -20,9 +24,18 @@ export function localToday(): string {
 export function lastDone(task: Task, mode: Display): string {
   if (!task.lastCompletedOn) return 'Never completed';
   if (mode === 'date') return fullDate(task.lastCompletedOn);
-  if (task.elapsedDays === 0) return 'Today';
-  if (task.elapsedDays === 1) return 'Yesterday';
-  return `${task.elapsedDays} days ago`;
+  const date = calendarDate(task.lastCompletedOn);
+  const month = date
+    .toLocaleDateString(undefined, { month: 'short' })
+    .replace(/\.$/, '')
+    .replace(/^./, (letter) => letter.toLocaleUpperCase());
+  const relative =
+    task.elapsedDays === 0
+      ? 'Today'
+      : task.elapsedDays === 1
+        ? 'Yesterday'
+        : `${task.elapsedDays} days ago`;
+  return `${relative} (${date.getDate()}\u00a0${month})`;
 }
 export function dueLabel(task: Task): string {
   if (task.status === 'grace')
