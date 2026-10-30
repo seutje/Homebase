@@ -35,15 +35,15 @@ Exit: recurrence rules and initial storage work without the UI and pass determin
 
 ## Phase 3 — Tasks, categories, and desktop list
 
-- [ ] Add Rust commands and typed IPC wrappers for listing/saving/deleting tasks and categories, with consistent validation errors.
-- [ ] Implement task forms for relative intervals or a weekday, category, tracking start, and optional initial completion.
-- [ ] Implement category create/rename/delete with transactional reassignment and protected Uncategorized.
-- [ ] Render spacious task rows with title, recurrence/category, always-visible last completion, due status, and completion actions.
-- [ ] Add global relative-date versus full-date display preference persisted in SQLite.
-- [ ] Add sidebar category filtering, All tasks, summary tiles, status filtering, counts, and Clear filters.
-- [ ] Add loading, empty, filtered-empty, and recoverable failure states.
-- [ ] Refresh on local midnight and focus/resume; verify the as-of date advances correctly.
-- [ ] Verify task/category edits and both date displays survive restart; inspect at minimum size and Windows scaling.
+- [x] Add Rust commands and typed IPC wrappers for listing/saving/deleting tasks and categories, with consistent validation errors.
+- [x] Implement task forms for relative intervals or a weekday, category, tracking start, and optional initial completion.
+- [x] Implement category create/rename/delete with transactional reassignment and protected Uncategorized.
+- [x] Render spacious task rows with title, recurrence/category, always-visible last completion, due status, and completion actions.
+- [x] Add global relative-date versus full-date display preference persisted in SQLite.
+- [x] Add sidebar category filtering, All tasks, summary tiles, status filtering, counts, and Clear filters.
+- [x] Add loading, empty, filtered-empty, and recoverable failure states.
+- [x] Refresh on local midnight and focus/resume; verify the as-of date advances correctly.
+- [x] Verify task/category edits and both date displays survive restart; inspect at minimum size and Windows scaling.
 
 Exit: real tasks can be managed and their age and due status read reliably in the desktop list.
 

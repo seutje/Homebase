@@ -58,3 +58,5 @@ Use focused tests where mistakes can corrupt records or change schedule behavior
 Run relevant frontend type/lint/build checks and Rust tests once the scripts exist. For UI changes inspect the real desktop layout at ordinary and minimum sizes; for release readiness test the packaged Windows app. Verify elapsed time/date stays visible and completion buttons remain usable. A browser-only preview cannot establish native persistence or installer behavior.
 
 Finish work with a concise report of what changed, what was verified, and any remaining limits. Keep PLAN.md honest about unverified or unfinished work.
+
+Use Playwright CLI through npx for UI checks, as requested by the user. Do not use computer-use tools. When native UI verification is useful, connect Playwright CLI to the Tauri WebView through a development-only loopback CDP endpoint; do not enable remote debugging in normal launches or release builds.

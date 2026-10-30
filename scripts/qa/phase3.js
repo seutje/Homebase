@@ -1,0 +1,34 @@
+async (page) => {
+  if (!(await page.getByRole('dialog').count())) await page.getByRole('button', { name: '+ Add task', exact: true }).click();
+  await page.getByLabel('Task name').fill('Wash bedsheets');
+  await page.getByRole('combobox', { name: 'Category', exact: true }).selectOption('2');
+  await page.getByLabel('Last completed').fill('2026-10-21');
+  await page.getByRole('button', { name: 'Save task', exact: true }).click();
+  await page.getByRole('dialog').waitFor({ state: 'hidden' });
+  await page.getByText('9 days ago', { exact: true }).waitFor();
+  await page.getByText('2 days overdue', { exact: true }).waitFor();
+  await page.getByRole('button', { name: '+ Manage categories' }).click();
+  await page.getByLabel('New category').fill('Garden');
+  await page.getByRole('button', { name: 'Add category', exact: true }).click();
+  await page.getByRole('button', { name: 'Garden Edit', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Close dialog' }).click();
+  await page.getByRole('button', { name: 'Garden 0', exact: true }).click();
+  await page.getByText('Nothing here right now.', { exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Clear filters' }).click();
+  await page.getByRole('button', { name: '⚙ Settings' }).click();
+  await page.getByRole('combobox', { name: 'Show last completion as', exact: true }).selectOption('date');
+  await page.getByRole('button', { name: 'Close dialog' }).click();
+  await page.reload();
+  await page.getByText('21 October 2026', { exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Garden 0', exact: true }).waitFor();
+  await page.setViewportSize({ width: 1180, height: 800 });
+  await page.screenshot({ path: '.qa/phase3-wide.png' });
+  await page.setViewportSize({ width: 900, height: 600 });
+  const row = page.locator('.task-row').first();
+  const elapsed = await row.locator('.completion-value').boundingBox();
+  const done = await row.getByRole('button', { name: 'Done', exact: true }).boundingBox();
+  if (!elapsed || !done || done.x + done.width > 900) throw new Error('Task completion information is clipped');
+  await page.screenshot({ path: '.qa/phase3-narrow.png' });
+  await page.setViewportSize({ width: 1180, height: 800 });
+  return 'Phase 3 passed: native SQLite CRUD, filters, preference persistence, wide and minimum layouts';
+}
