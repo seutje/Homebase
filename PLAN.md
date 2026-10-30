@@ -85,11 +85,11 @@ Exit: v1 can be used daily and its data can be recovered. Stop here for actual u
 
 ## Phase 7 — V2: snooze and personal urgency (optional)
 
-- [ ] Add migrated snooze state and Snooze/Unsnooze controls without changing completion history or actual recurrence.
-- [ ] Show snoozed tasks in All tasks and a dedicated filter; adjust counts and wake on the selected local date.
-- [ ] Handle completion clearing snooze and Undo restoring that prior snooze transactionally.
-- [ ] Add app defaults and per-task overrides for coming-up window and overdue grace, with explicit due-within-grace presentation.
-- [ ] Test snooze expiry after closed-app periods, undo, backdating, grace boundaries, and combined summary/filter behavior.
+- [x] Add migrated snooze state and Snooze/Unsnooze controls without changing completion history or actual recurrence.
+- [x] Show snoozed tasks in All tasks and a dedicated filter; adjust counts and wake on the selected local date.
+- [x] Handle completion clearing snooze and Undo restoring that prior snooze transactionally.
+- [x] Add app defaults and per-task overrides for coming-up window and overdue grace, with explicit due-within-grace presentation.
+- [x] Test snooze expiry after closed-app periods, undo, backdating, grace boundaries, and combined summary/filter behavior.
 
 Exit: postponement and gentler urgency are understandable without distorting last completion.
 

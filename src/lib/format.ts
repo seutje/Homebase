@@ -25,6 +25,11 @@ export function lastDone(task: Task, mode: Display): string {
   return `${task.elapsedDays} days ago`;
 }
 export function dueLabel(task: Task): string {
+  if (task.status === 'grace')
+    return `Due within grace · ${actualDueLabel(task)}`;
+  return actualDueLabel(task);
+}
+export function actualDueLabel(task: Task): string {
   if (task.daysUntilDue < 0)
     return `${-task.daysUntilDue} ${task.daysUntilDue === -1 ? 'day' : 'days'} overdue`;
   if (task.daysUntilDue === 0) return 'Due today';

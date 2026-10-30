@@ -6,9 +6,15 @@ import type {
   TaskList,
   Completion,
   TemplateSelection,
+  UrgencyDefaults,
 } from '../types';
 
 export const api = {
+  snooze: (id: number, until: string | null) =>
+    invoke<void>('snooze_task', { id, until }),
+  saveUrgency: (value: UrgencyDefaults) =>
+    invoke<void>('save_urgency_defaults', { value }),
+  undoCompletion: (id: number) => invoke<void>('undo_completion', { id }),
   exportBackup: (path: string) => invoke<void>('export_backup', { path }),
   restoreBackup: (path: string) => invoke<string>('restore_backup', { path }),
   directory: () => invoke<string>('get_data_directory'),

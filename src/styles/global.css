@@ -703,3 +703,40 @@ main > :not(.task-list) {
   color: #334e39;
   overflow-wrap: anywhere;
 }
+.summary {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+.filter-chip {
+  font-size: 11px;
+  padding: 7px 10px;
+  border-radius: 20px;
+  background: transparent;
+  color: var(--muted);
+}
+.filter-chip.active {
+  background: #dce4d6;
+  border-color: #91a589;
+  color: #334d39;
+}
+.list-toolbar {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.snooze-link {
+  font-size: 11px;
+  margin-top: 7px;
+}
+.completion-actions-wrap {
+  text-align: center;
+}
+.state-label {
+  color: #586f7b !important;
+  font-size: 11px;
+  margin-top: 6px;
+}
+.grace .completion-value strong {
+  color: #827243;
+}
+.snoozed .completion-value strong {
+  color: #657980;
+}

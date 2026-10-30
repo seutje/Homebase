@@ -6,7 +6,9 @@ export default defineConfig({
   server: {
     port: 1437,
     strictPort: true,
-    watch: { ignored: ['**/src-tauri/**', '**/.qa/**', '**/.playwright-cli/**'] },
+    watch: {
+      ignored: ['**/src-tauri/**', '**/.qa/**', '**/.playwright-cli/**'],
+    },
   },
   clearScreen: false,
   test: { environment: 'jsdom', setupFiles: ['./src/test/setup.ts'] },

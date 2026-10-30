@@ -13,6 +13,7 @@ import { CompletionActions } from './features/tasks/CompletionActions';
 import { useToasts } from './lib/useToasts';
 import { Toasts } from './components/Toasts';
 import { ChoreLibrary } from './features/library/ChoreLibrary';
+import { SnoozeForm } from './features/tasks/SnoozeForm';
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ function Homebase() {
     useHomebase();
   const [selected, setSelected] = useState<number | null>(null);
   const [backdate, setBackdate] = useState<Task | null>(null);
+  const [snoozing, setSnoozing] = useState<Task | null>(null);
   const [pending, setPending] = useState<number[]>([]);
   const locks = useRef(new Set<number>());
   const { toasts, notify, remove, clear } = useToasts();
@@ -49,7 +51,7 @@ function Homebase() {
           `${task.title} completed ${completedOn === data?.asOfDate ? 'today' : `on ${fullDate(completedOn)}`}`,
           async () => {
             try {
-              await api.deleteCompletion(result.id);
+              await api.undoCompletion(result.id);
               await refresh();
             } catch (e) {
               setError(errorMessage(e));
@@ -150,6 +152,9 @@ function Homebase() {
               { key: 'attention', label: 'Needs attention' },
               { key: 'upcoming', label: 'Coming up' },
               { key: 'good', label: 'All good' },
+              ...(categoryTasks.some((t) => t.status === 'grace')
+                ? [{ key: 'grace' as const, label: 'Due within grace' }]
+                : []),
             ] as const
           ).map((tile) => (
             <button
@@ -165,6 +170,13 @@ function Homebase() {
           ))}
         </div>
         <div className="list-toolbar">
+          <button
+            className={`filter-chip ${status === 'snoozed' ? 'active' : ''}`}
+            onClick={() => setStatus(status === 'snoozed' ? null : 'snoozed')}
+          >
+            Snoozed ·{' '}
+            {categoryTasks.filter((t) => t.status === 'snoozed').length}
+          </button>
           <p>
             {filtered
               ? `Showing ${visible.length} of ${tasks.length}`
@@ -249,11 +261,17 @@ function Homebase() {
                 >
                   <strong>{lastDone(task, display)}</strong>
                   <span>{dueLabel(task)}</span>
+                  {task.status === 'snoozed' && task.snoozedUntil && (
+                    <span className="state-label">
+                      Snoozed until {fullDate(task.snoozedUntil)}
+                    </span>
+                  )}
                 </div>
                 <CompletionActions
                   busy={pending.includes(task.id)}
                   onDone={() => done(task)}
                   onBackdate={() => setBackdate(task)}
+                  onSnooze={() => setSnoozing(task)}
                 />
               </article>
             ))}
@@ -269,6 +287,7 @@ function Homebase() {
           busy={pending.includes(selectedTask.id)}
           onDone={() => done(selectedTask)}
           onBackdate={() => setBackdate(selectedTask)}
+          onSnooze={() => setSnoozing(selectedTask)}
           onEdit={() => setForm(selectedTask)}
           onClose={() => setSelected(null)}
           onChanged={refresh}
@@ -281,6 +300,17 @@ function Homebase() {
           today={data.asOfDate}
           onSave={(value) => complete(backdate, value)}
           onClose={() => setBackdate(null)}
+        />
+      )}
+      {snoozing && data && (
+        <SnoozeForm
+          task={tasks.find((t) => t.id === snoozing.id) ?? snoozing}
+          today={data.asOfDate}
+          onSave={async (until) => {
+            await api.snooze(snoozing.id, until);
+            await refresh();
+          }}
+          onClose={() => setSnoozing(null)}
         />
       )}
       {form && data && (
@@ -301,12 +331,16 @@ function Homebase() {
       )}
       {settings && (
         <Settings
+          urgency={
+            data?.urgencyDefaults ?? { comingUpDays: null, graceDays: 0 }
+          }
           display={display}
           onSaved={refresh}
           onRestored={async () => {
             clear();
             setSelected(null);
             setBackdate(null);
+            setSnoozing(null);
             setCategory(null);
             setStatus(null);
             await refresh();

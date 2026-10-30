@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Dialog, useConfirm } from '../../components/Dialog';
 import { api, errorMessage } from '../../lib/api';
 import { weekdays } from '../../lib/format';
+import { UrgencyFields } from '../../components/UrgencyFields';
 import type { Category, Schedule, Task, TaskInput } from '../../types';
 
 export function TaskForm({
@@ -24,6 +25,8 @@ export function TaskForm({
     schedule: task?.schedule ?? { kind: 'relative', value: 7, unit: 'days' },
     trackingStartOn: task?.trackingStartOn ?? today,
     initialCompletedOn: null,
+    comingUpDays: task?.comingUpDays ?? null,
+    graceDays: task?.graceDays ?? null,
   };
   const [input, setInput] = useState(initial);
   const [busy, setBusy] = useState(false);
@@ -197,6 +200,16 @@ export function TaskForm({
             <p className="hint">
               Without a completion, the first relative due date is this date.
             </p>
+          </details>
+          <details>
+            <summary>Personal urgency</summary>
+            <UrgencyFields
+              coming={input.comingUpDays}
+              grace={input.graceDays}
+              onChange={(comingUpDays, graceDays) =>
+                setInput((old) => ({ ...old, comingUpDays, graceDays }))
+              }
+            />
           </details>
         </fieldset>
         {error && (

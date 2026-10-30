@@ -18,9 +18,14 @@ pub struct TaskInput {
     pub schedule: Schedule,
     pub tracking_start_on: String,
     pub initial_completed_on: Option<String>,
+    #[serde(default)]
+    pub coming_up_days: Option<u32>,
+    #[serde(default)]
+    pub grace_days: Option<u32>,
 }
 
 pub fn save(conn: &mut Connection, input: &TaskInput, today: NaiveDate) -> Result<i64> {
+    crate::urgency::validate(input.coming_up_days, input.grace_days)?;
     let title = input.title.trim();
     if title.is_empty() || title.chars().count() > 200 {
         return Err(AppError::invalid("Task titles need 1–200 characters."));
@@ -75,6 +80,10 @@ pub fn save(conn: &mut Connection, input: &TaskInput, today: NaiveDate) -> Resul
         }
         id
     };
+    tx.execute(
+        "UPDATE tasks SET coming_up_days=?1,grace_days=?2 WHERE id=?3",
+        params![input.coming_up_days, input.grace_days, id],
+    )?;
     tx.commit()?;
     Ok(id)
 }
@@ -96,17 +105,22 @@ pub struct Task {
     pub schedule: Schedule,
     pub tracking_start_on: String,
     pub source_template_key: Option<String>,
+    pub snoozed_until: Option<String>,
+    pub coming_up_days: Option<u32>,
+    pub grace_days: Option<u32>,
     #[serde(flatten)]
     pub timing: Timing,
 }
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TaskList {
+    pub urgency_defaults: crate::urgency::Defaults,
     pub as_of_date: String,
     pub tasks: Vec<Task>,
 }
 
 pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
+    let urgency_defaults = crate::urgency::defaults(conn)?;
     let mut stmt=conn.prepare("SELECT t.id,t.title,t.category_id,c.name,t.schedule_kind,t.interval_value,t.interval_unit,t.weekday,t.tracking_start_on,t.source_template_key,MAX(h.completed_on) FROM tasks t JOIN categories c ON c.id=t.category_id LEFT JOIN completions h ON h.task_id=t.id GROUP BY t.id")?;
     let rows = stmt.query_map([], |r| {
         let kind: String = r.get(4)?;
@@ -141,9 +155,26 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
             source_template_key,
             last,
         ) = row?;
-        let timing = schedule.timing(
+        let mut timing = schedule.timing(
             date(&tracking_start_on)?,
             last.as_deref().map(date).transpose()?,
+            today,
+        )?;
+        let (snoozed_until, coming_up_days, grace_days): (
+            Option<String>,
+            Option<u32>,
+            Option<u32>,
+        ) = conn.query_row(
+            "SELECT snoozed_until,coming_up_days,grace_days FROM tasks WHERE id=?1",
+            [id],
+            |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
+        )?;
+        crate::urgency::apply(
+            &mut timing,
+            coming_up_days,
+            grace_days,
+            &urgency_defaults,
+            snoozed_until.as_deref(),
             today,
         )?;
         tasks.push(Task {
@@ -154,6 +185,9 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
             schedule,
             tracking_start_on,
             source_template_key,
+            snoozed_until,
+            coming_up_days,
+            grace_days,
             timing,
         });
     }
@@ -165,6 +199,7 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
             .then(a.id.cmp(&b.id))
     });
     Ok(TaskList {
+        urgency_defaults,
         as_of_date: today.to_string(),
         tasks,
     })
@@ -182,6 +217,8 @@ mod tests {
         {
             let mut c = crate::database::open(&path).unwrap();
             let mut input = TaskInput {
+                coming_up_days: None,
+                grace_days: None,
                 id: None,
                 title: " Bedsheets ".into(),
                 category_id: 2,

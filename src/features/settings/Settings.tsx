@@ -3,20 +3,24 @@ import { open, save } from '@tauri-apps/plugin-dialog';
 import { Dialog, useConfirm } from '../../components/Dialog';
 import { api, errorMessage } from '../../lib/api';
 import { localToday } from '../../lib/format';
-import type { Display } from '../../types';
+import type { Display, UrgencyDefaults } from '../../types';
+import { UrgencyFields } from '../../components/UrgencyFields';
 
 export function Settings({
   display,
+  urgency,
   onSaved,
   onRestored,
   onClose,
 }: {
   display: Display;
+  urgency: UrgencyDefaults;
   onSaved: () => Promise<void>;
   onRestored: () => Promise<void>;
   onClose: () => void;
 }) {
   const [busy, setBusy] = useState(false);
+  const [urgencyInput, setUrgencyInput] = useState(urgency);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [directory, setDirectory] = useState('');
@@ -65,6 +69,30 @@ export function Settings({
       <p className="hint">
         Your chosen format is always visible in the task list.
       </p>
+      <section className="backup-settings">
+        <h3>Default urgency</h3>
+        <fieldset disabled={busy}>
+          <UrgencyFields
+            defaults
+            coming={urgencyInput.comingUpDays}
+            grace={urgencyInput.graceDays}
+            onChange={(comingUpDays, graceDays) =>
+              setUrgencyInput({ comingUpDays, graceDays: graceDays ?? 0 })
+            }
+          />
+          <button
+            onClick={() =>
+              void perform(async () => {
+                await api.saveUrgency(urgencyInput);
+                await onSaved();
+                setMessage('Urgency defaults saved.');
+              })
+            }
+          >
+            Save urgency defaults
+          </button>
+        </fieldset>
+      </section>
       <section className="backup-settings">
         <h3>Your data, on your computer</h3>
         <p className="hint">

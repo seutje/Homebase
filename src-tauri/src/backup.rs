@@ -146,12 +146,41 @@ pub fn restore(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn v1_backups_migrate_in_staging_without_modifying_source() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut live = setup(dir.path());
+        let input_path = dir.path().join("v1.db");
+        let source = Connection::open(&input_path).unwrap();
+        source
+            .execute_batch(include_str!("../migrations/0001_initial.sql"))
+            .unwrap();
+        source.pragma_update(None, "user_version", 1).unwrap();
+        drop(source);
+        restore(
+            &mut live,
+            &input_path,
+            dir.path(),
+            crate::schedule::date("2026-10-30").unwrap(),
+        )
+        .unwrap();
+        assert_eq!(crate::urgency::defaults(&live).unwrap().grace_days, 0);
+        let source = Connection::open(&input_path).unwrap();
+        assert_eq!(
+            source
+                .pragma_query_value(None, "user_version", |r| r.get::<_, i64>(0))
+                .unwrap(),
+            1
+        );
+    }
     fn setup(directory: &Path) -> Connection {
         let mut c = database::open(&directory.join("homebase.db")).unwrap();
         let today = crate::schedule::date("2026-10-30").unwrap();
         crate::tasks::save(
             &mut c,
             &crate::tasks::TaskInput {
+                coming_up_days: None,
+                grace_days: None,
                 id: None,
                 title: "Sheets".into(),
                 category_id: 2,

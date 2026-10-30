@@ -51,6 +51,10 @@ pub fn record(
         params![task_id, completed_on],
         |r| r.get(0),
     )?;
+    if inserted {
+        tx.execute("UPDATE completions SET prior_snoozed_until=(SELECT snoozed_until FROM tasks WHERE id=?1),cleared_snooze_revision=(SELECT snooze_revision+1 FROM tasks WHERE id=?1) WHERE id=?2",params![task_id,id])?;
+        tx.execute("UPDATE tasks SET snoozed_until=NULL,snooze_revision=snooze_revision+1,updated_at=?2 WHERE id=?1",params![task_id,now])?;
+    }
     crate::tasks::list(&tx, today)?;
     tx.commit()?;
     Ok(Recorded { id, inserted })
@@ -83,7 +87,16 @@ pub fn update(conn: &mut Connection, id: i64, completed_on: &str, today: NaiveDa
     Ok(())
 }
 pub fn delete(conn: &mut Connection, id: i64, today: NaiveDate) -> Result<()> {
+    remove(conn, id, today, false)
+}
+pub fn undo(conn: &mut Connection, id: i64, today: NaiveDate) -> Result<()> {
+    remove(conn, id, today, true)
+}
+fn remove(conn: &mut Connection, id: i64, today: NaiveDate, undo: bool) -> Result<()> {
     let tx = conn.transaction()?;
+    if undo {
+        tx.execute("UPDATE tasks SET snoozed_until=(SELECT prior_snoozed_until FROM completions WHERE id=?1),snooze_revision=snooze_revision+1,updated_at=?2 WHERE id=(SELECT task_id FROM completions WHERE id=?1) AND snooze_revision=(SELECT cleared_snooze_revision FROM completions WHERE id=?1)",params![id,chrono::Utc::now().to_rfc3339()])?;
+    }
     if tx.execute("DELETE FROM completions WHERE id=?1", [id])? == 0 {
         return Err(AppError::missing());
     }
@@ -95,6 +108,32 @@ pub fn delete(conn: &mut Connection, id: i64, today: NaiveDate) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn completion_undo_restores_snooze_but_preserves_later_choices() {
+        let (mut c, today) = setup();
+        crate::urgency::snooze(&c, 1, Some("2026-11-02".into()), today).unwrap();
+        let event = record(&mut c, 1, "2026-10-21", today).unwrap();
+        assert_eq!(
+            crate::tasks::list(&c, today).unwrap().tasks[0].snoozed_until,
+            None
+        );
+        undo(&mut c, event.id, today).unwrap();
+        let task = crate::tasks::list(&c, today).unwrap().tasks.remove(0);
+        assert_eq!(task.snoozed_until.as_deref(), Some("2026-11-02"));
+        assert!(task.timing.last_completed_on.is_none());
+        let event = record(&mut c, 1, "2026-10-21", today).unwrap();
+        crate::urgency::snooze(&c, 1, Some("2026-11-05".into()), today).unwrap();
+        let duplicate = record(&mut c, 1, "2026-10-21", today).unwrap();
+        assert!(!duplicate.inserted);
+        undo(&mut c, event.id, today).unwrap();
+        assert_eq!(
+            crate::tasks::list(&c, today).unwrap().tasks[0]
+                .snoozed_until
+                .as_deref(),
+            Some("2026-11-05")
+        );
+        assert!(crate::urgency::snooze(&c, 1, Some("2026-10-30".into()), today).is_err());
+    }
     fn setup() -> (Connection, NaiveDate) {
         let mut c = Connection::open_in_memory().unwrap();
         c.pragma_update(None, "foreign_keys", true).unwrap();

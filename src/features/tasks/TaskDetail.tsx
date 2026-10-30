@@ -13,6 +13,7 @@ export function TaskDetail({
   busy,
   onDone,
   onBackdate,
+  onSnooze,
   onEdit,
   onClose,
   onChanged,
@@ -23,6 +24,7 @@ export function TaskDetail({
   busy: boolean;
   onDone: () => void;
   onBackdate: () => void;
+  onSnooze: () => void;
   onEdit: () => void;
   onClose: () => void;
   onChanged: () => Promise<void>;
@@ -87,6 +89,11 @@ export function TaskDetail({
           </button>
         </header>
         <h2>{task.title}</h2>
+        {task.status === 'snoozed' && task.snoozedUntil && (
+          <p className="state-label">
+            Snoozed until {fullDate(task.snoozedUntil)}
+          </p>
+        )}
         <p className="muted small">
           {task.categoryName} · {recurrence(task.schedule)}
         </p>
@@ -106,6 +113,7 @@ export function TaskDetail({
           busy={busy || working}
           onDone={onDone}
           onBackdate={onBackdate}
+          onSnooze={onSnooze}
         />
         <button
           className="text-button detail-edit"

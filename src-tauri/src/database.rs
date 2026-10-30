@@ -2,7 +2,7 @@ use crate::error::{AppError, Result};
 use rusqlite::Connection;
 use std::path::Path;
 
-pub const SCHEMA_VERSION: i64 = 1;
+pub const SCHEMA_VERSION: i64 = 2;
 pub fn open(path: &Path) -> Result<Connection> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
@@ -23,6 +23,13 @@ pub fn migrate(conn: &mut Connection) -> Result<()> {
     if version < 1 {
         apply(conn, include_str!("../migrations/0001_initial.sql"), 1)?;
     }
+    if version < 2 {
+        apply(
+            conn,
+            include_str!("../migrations/0002_snooze_urgency.sql"),
+            2,
+        )?;
+    }
     Ok(())
 }
 fn apply(conn: &mut Connection, sql: &str, version: i64) -> Result<()> {
@@ -35,6 +42,23 @@ fn apply(conn: &mut Connection, sql: &str, version: i64) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn v1_upgrade_preserves_data_and_introduces_defaults() {
+        let mut c = Connection::open_in_memory().unwrap();
+        c.execute_batch(include_str!("../migrations/0001_initial.sql"))
+            .unwrap();
+        c.pragma_update(None, "user_version", 1).unwrap();
+        c.execute("UPDATE categories SET name='My kitchen' WHERE id=3", [])
+            .unwrap();
+        migrate(&mut c).unwrap();
+        assert_eq!(crate::urgency::defaults(&c).unwrap().grace_days, 0);
+        assert_eq!(
+            c.query_row("SELECT name FROM categories WHERE id=3", [], |r| r
+                .get::<_, String>(0))
+                .unwrap(),
+            "My kitchen"
+        );
+    }
     #[test]
     fn fresh_reopen_and_seed_once() {
         let dir = tempfile::tempdir().unwrap();

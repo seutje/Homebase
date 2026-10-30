@@ -29,10 +29,14 @@ beforeEach(() => {
     nextDue: '2026-10-28',
     daysUntilDue: -2,
     status: 'attention',
+    snoozedUntil: null,
+    comingUpDays: null,
+    graceDays: null,
   };
   vi.spyOn(api, 'tasks').mockImplementation(async () => ({
     asOfDate: '2026-10-30',
     tasks: [{ ...task }],
+    urgencyDefaults: { comingUpDays: null, graceDays: 0 },
   }));
   vi.spyOn(api, 'categories').mockResolvedValue([
     { id: 1, name: 'Uncategorized' },
@@ -46,6 +50,26 @@ afterEach(() => {
 });
 
 describe('completion workflows', () => {
+  it('snoozes without hiding completion age from All tasks, with a separate filter', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(api, 'snooze').mockImplementation(async (_id, until) => {
+      task = { ...task, snoozedUntil: until, status: 'snoozed' };
+    });
+    render(<App />);
+    await screen.findByText('9 days ago');
+    await user.click(screen.getByRole('button', { name: /^Snooze$/ }));
+    fireEvent.change(screen.getByLabelText('Snooze until'), {
+      target: { value: '2026-11-03' },
+    });
+    await user.click(screen.getByRole('button', { name: 'Snooze task' }));
+    await screen.findByText(/Snoozed until/);
+    expect(screen.getByText('9 days ago')).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Snoozed · 1' }));
+    expect(screen.getByText('9 days ago')).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: /0\s*Needs attention/ }),
+    ).toBeVisible();
+  });
   it('records today after commit and undoes the exact inserted completion', async () => {
     const user = userEvent.setup();
     const record = vi.spyOn(api, 'record').mockImplementation(async () => {
@@ -59,7 +83,7 @@ describe('completion workflows', () => {
       return { id: 81, inserted: true };
     });
     const remove = vi
-      .spyOn(api, 'deleteCompletion')
+      .spyOn(api, 'undoCompletion')
       .mockImplementation(async () => {
         task = {
           ...task,

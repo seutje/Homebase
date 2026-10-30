@@ -1,7 +1,11 @@
 export type Schedule =
   | { kind: 'relative'; value: number; unit: 'days' | 'weeks' | 'months' }
   | { kind: 'weekly'; weekday: number };
-export type Status = 'attention' | 'upcoming' | 'good';
+export type Status = 'attention' | 'upcoming' | 'good' | 'grace' | 'snoozed';
+export type UrgencyDefaults = {
+  comingUpDays: number | null;
+  graceDays: number;
+};
 export type Category = { id: number; name: string };
 export type Task = {
   id: number;
@@ -16,6 +20,9 @@ export type Task = {
   nextDue: string;
   daysUntilDue: number;
   status: Status;
+  snoozedUntil: string | null;
+  comingUpDays: number | null;
+  graceDays: number | null;
 };
 export type TaskInput = {
   id: number | null;
@@ -24,8 +31,14 @@ export type TaskInput = {
   schedule: Schedule;
   trackingStartOn: string;
   initialCompletedOn: string | null;
+  comingUpDays: number | null;
+  graceDays: number | null;
 };
-export type TaskList = { asOfDate: string; tasks: Task[] };
+export type TaskList = {
+  asOfDate: string;
+  tasks: Task[];
+  urgencyDefaults: UrgencyDefaults;
+};
 export type Display = 'relative' | 'date';
 export type TemplateSelection = {
   key: string;

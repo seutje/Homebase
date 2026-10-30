@@ -8,6 +8,7 @@ mod schedule;
 mod settings;
 mod state;
 mod tasks;
+mod urgency;
 
 use error::Result;
 use state::Store;
@@ -118,10 +119,26 @@ fn open_data_directory(store: State<Store>) -> Result<()> {
     }
 }
 
+#[tauri::command]
+fn snooze_task(store: State<Store>, id: i64, until: Option<String>) -> Result<()> {
+    store.with(|c| urgency::snooze(c, id, until, chrono::Local::now().date_naive()))
+}
+#[tauri::command]
+fn save_urgency_defaults(store: State<Store>, value: urgency::Defaults) -> Result<()> {
+    store.with(|c| urgency::save_defaults(c, value))
+}
+#[tauri::command]
+fn undo_completion(store: State<Store>, id: i64) -> Result<()> {
+    store.with(|c| completions::undo(c, id, chrono::Local::now().date_naive()))
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
+            snooze_task,
+            save_urgency_defaults,
+            undo_completion,
             list_tasks,
             save_task,
             delete_task,
