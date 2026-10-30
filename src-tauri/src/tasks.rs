@@ -12,6 +12,8 @@ use serde::Serialize;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TaskInput {
+    #[serde(default)]
+    pub active_months: Vec<u32>,
     pub id: Option<i64>,
     pub title: String,
     pub category_id: i64,
@@ -25,6 +27,7 @@ pub struct TaskInput {
 }
 
 pub fn save(conn: &mut Connection, input: &TaskInput, today: NaiveDate) -> Result<i64> {
+    crate::seasons::validate(&input.active_months)?;
     crate::urgency::validate(input.coming_up_days, input.grace_days)?;
     let title = input.title.trim();
     if title.is_empty() || title.chars().count() > 200 {
@@ -84,6 +87,10 @@ pub fn save(conn: &mut Connection, input: &TaskInput, today: NaiveDate) -> Resul
         "UPDATE tasks SET coming_up_days=?1,grace_days=?2 WHERE id=?3",
         params![input.coming_up_days, input.grace_days, id],
     )?;
+    tx.execute(
+        "UPDATE tasks SET active_months=?1 WHERE id=?2",
+        params![serde_json::to_string(&input.active_months).unwrap(), id],
+    )?;
     tx.commit()?;
     Ok(id)
 }
@@ -98,6 +105,10 @@ pub fn delete(conn: &Connection, id: i64) -> Result<()> {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Task {
+    pub active_months: Vec<u32>,
+    pub is_snoozed: bool,
+    pub is_out_of_season: bool,
+    pub recurrence_due: String,
     pub id: i64,
     pub title: String,
     pub category_id: i64,
@@ -169,6 +180,13 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
             [id],
             |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
         )?;
+        let active_months: String =
+            conn.query_row("SELECT active_months FROM tasks WHERE id=?1", [id], |r| {
+                r.get(0)
+            })?;
+        let active_months = crate::seasons::parse(&active_months)?;
+        let recurrence_due = timing.next_due.clone();
+        let is_out_of_season = crate::seasons::apply(&mut timing, &active_months, today)?;
         crate::urgency::apply(
             &mut timing,
             coming_up_days,
@@ -177,7 +195,15 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
             snoozed_until.as_deref(),
             today,
         )?;
+        let is_snoozed = timing.status == "snoozed";
+        if is_out_of_season {
+            timing.status = "outOfSeason";
+        }
         tasks.push(Task {
+            active_months,
+            is_snoozed,
+            is_out_of_season,
+            recurrence_due,
             id,
             title,
             category_id,
@@ -209,6 +235,45 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
 mod tests {
     use super::*;
     #[test]
+    fn seasonal_settings_persist_and_snooze_remains_independent() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("seasonal.db");
+        let today = date("2026-10-30").unwrap();
+        {
+            let mut c = crate::database::open(&path).unwrap();
+            let input = TaskInput {
+                active_months: vec![11, 12, 1, 2],
+                coming_up_days: None,
+                grace_days: None,
+                id: None,
+                title: "Winter chore".into(),
+                category_id: 1,
+                schedule: Schedule::Relative {
+                    value: 7,
+                    unit: "days".into(),
+                },
+                tracking_start_on: "2025-01-01".into(),
+                initial_completed_on: None,
+            };
+            let id = save(&mut c, &input, today).unwrap();
+            crate::urgency::snooze(&c, id, Some("2026-11-05".into()), today).unwrap();
+        }
+        let c = crate::database::open(&path).unwrap();
+        let task = list(&c, today).unwrap().tasks.remove(0);
+        assert!(task.is_out_of_season);
+        assert!(task.is_snoozed);
+        assert_eq!(task.timing.status, "outOfSeason");
+        assert!(task.timing.last_completed_on.is_none());
+        let task = list(&c, date("2026-11-06").unwrap())
+            .unwrap()
+            .tasks
+            .remove(0);
+        assert!(!task.is_out_of_season);
+        assert!(!task.is_snoozed);
+        assert_eq!(task.timing.next_due, "2026-11-01");
+        assert_eq!(task.recurrence_due, "2025-01-01");
+    }
+    #[test]
     fn edits_and_preferences_survive_reopen_and_invalid_inputs_do_not_write() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("test.db");
@@ -217,6 +282,7 @@ mod tests {
         {
             let mut c = crate::database::open(&path).unwrap();
             let mut input = TaskInput {
+                active_months: vec![],
                 coming_up_days: None,
                 grace_days: None,
                 id: None,

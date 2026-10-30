@@ -179,6 +179,7 @@ mod tests {
         crate::tasks::save(
             &mut c,
             &crate::tasks::TaskInput {
+                active_months: vec![],
                 coming_up_days: None,
                 grace_days: None,
                 id: None,

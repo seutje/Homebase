@@ -1,0 +1,30 @@
+async (page) => {
+  const directory=await page.evaluate(()=>window.__TAURI_INTERNALS__.invoke('get_data_directory'));
+  if(!directory.replaceAll('\\','/').includes('/.qa/v2-data')) throw new Error('Use isolated v2 QA data');
+  await page.getByRole('button',{name:'+ Add task',exact:true}).click();
+  await page.getByLabel('Task name').fill('Winter taps');
+  await page.getByText('Tracking start date',{exact:true}).click();
+  await page.getByLabel('First due / start tracking').fill('2025-01-01');
+  await page.getByText('Seasonal months',{exact:true}).click();
+  for(const month of ['Nov','Dec','Jan','Feb']) await page.getByRole('button',{name:month,exact:true}).click();
+  await page.getByRole('button',{name:'Save task',exact:true}).click();
+  await page.getByRole('dialog').waitFor({state:'hidden'});
+  const row=page.locator('.task-row').filter({has:page.getByText('Winter taps',{exact:true})});
+  await row.getByText('Out of season',{exact:true}).waitFor();
+  await row.getByText('Never completed',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'1 Needs attention',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Out of season · 1',exact:true}).click();
+  if(await page.locator('.task-row').count()!==1) throw new Error('Season filter failed');
+  await page.getByRole('button',{name:'Clear filters',exact:true}).click();
+  await row.getByRole('button').first().click();
+  await page.getByRole('button',{name:'Edit task',exact:true}).click();
+  await page.getByText('Seasonal months',{exact:true}).click();
+  await page.getByRole('button',{name:'Oct',exact:true}).click();
+  await page.getByRole('button',{name:'Save task',exact:true}).click();
+  await page.locator('.detail-panel').getByText(/carried forward to this season/).waitFor();
+  await page.getByRole('button',{name:'Close details'}).click();
+  await page.reload();await row.getByText('Never completed',{exact:true}).waitFor();
+  await row.getByText('29 days overdue',{exact:true}).waitFor();
+  await page.screenshot({path:'.qa/phase8.png'});
+  return 'Phase 8 passed: inactive tasks remain visible, active counts/filtering, month editing, seasonal carry-forward and reload persistence';
+}

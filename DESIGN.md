@@ -211,6 +211,8 @@ Build locally for Windows with an NSIS installer. Preserve user data across upgr
 
 Phase 7 implementation: snoozed tasks are excluded from all active urgency counts and retain their original due label. Grace includes due today when the configured grace is positive, through the configured number of overdue calendar days; zero preserves v1 behavior. Blank task overrides inherit app defaults, and blank app coming-up days keeps the automatic interval-based window. All explicit windows accept 0–365 days. Undo restores the prior snooze only if no later snooze, unsnooze, or completion has changed that task's snooze state.
 
+Phase 8 implementation: no selected months (or all twelve) means all year. A gap between selected months starts a separate active window. Out-of-season status takes precedence over urgency, while snooze remains independently visible and manageable through its filter. The original recurrence date is retained alongside the seasonal due date; details explain any carry-forward. Completion is allowed outside the season and records only the actual date chosen.
+
 Implement these only after v1 is usable; each is independently useful.
 
 - **Snooze without completion:** choose a future date, persist `snoozed_until`, and leave history and true next due untouched. Until that date show Snoozed until…, retain last completion and actual due in the row, and exclude it from attention/coming-up counts. All tasks still includes it; provide a Snoozed filter and count. Wake on that date, clear on completion or explicit unsnooze, and test undo restoring any snooze cleared by that completion transaction.

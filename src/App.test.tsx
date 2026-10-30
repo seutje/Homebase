@@ -18,6 +18,10 @@ beforeEach(() => {
   };
   task = {
     id: 3,
+    activeMonths: [],
+    isSnoozed: false,
+    isOutOfSeason: false,
+    recurrenceDue: '2026-10-28',
     title: 'Wash bedsheets',
     categoryId: 2,
     categoryName: 'Laundry',
@@ -53,7 +57,12 @@ describe('completion workflows', () => {
   it('snoozes without hiding completion age from All tasks, with a separate filter', async () => {
     const user = userEvent.setup();
     vi.spyOn(api, 'snooze').mockImplementation(async (_id, until) => {
-      task = { ...task, snoozedUntil: until, status: 'snoozed' };
+      task = {
+        ...task,
+        snoozedUntil: until,
+        status: 'snoozed',
+        isSnoozed: true,
+      };
     });
     render(<App />);
     await screen.findByText('9 days ago');

@@ -95,10 +95,10 @@ Exit: postponement and gentler urgency are understandable without distorting las
 
 ## Phase 8 — V2: seasonal tasks (optional)
 
-- [ ] Add active-month configuration through a migration and simple task editor controls.
-- [ ] Implement active-window due behavior, Out of season labels, and active summary counts as described in DESIGN.md.
-- [ ] Keep last completion visible and inactive tasks available in All tasks.
-- [ ] Test noncontiguous active months, November–February windows, year rollover, never-completed tasks, and re-entry after missed seasons.
+- [x] Add active-month configuration through a migration and simple task editor controls.
+- [x] Implement active-window due behavior, Out of season labels, and active summary counts as described in DESIGN.md.
+- [x] Keep last completion visible and inactive tasks available in All tasks.
+- [x] Test noncontiguous active months, November–February windows, year rollover, never-completed tasks, and re-entry after missed seasons.
 
 Exit: seasonal chores become relevant at the appropriate time without fabricated history.
 

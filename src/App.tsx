@@ -76,7 +76,9 @@ function Homebase() {
     ? tasks.filter((t) => t.categoryId === category)
     : tasks;
   const visible = status
-    ? categoryTasks.filter((t) => t.status === status)
+    ? categoryTasks.filter((t) =>
+        status === 'snoozed' ? t.isSnoozed : t.status === status,
+      )
     : categoryTasks;
   const filtered = !!activeCategory || !!status;
   return (
@@ -170,12 +172,22 @@ function Homebase() {
           ))}
         </div>
         <div className="list-toolbar">
+          {categoryTasks.some((t) => t.isOutOfSeason) && (
+            <button
+              className={`filter-chip ${status === 'outOfSeason' ? 'active' : ''}`}
+              onClick={() =>
+                setStatus(status === 'outOfSeason' ? null : 'outOfSeason')
+              }
+            >
+              Out of season ·{' '}
+              {categoryTasks.filter((t) => t.isOutOfSeason).length}
+            </button>
+          )}
           <button
             className={`filter-chip ${status === 'snoozed' ? 'active' : ''}`}
             onClick={() => setStatus(status === 'snoozed' ? null : 'snoozed')}
           >
-            Snoozed ·{' '}
-            {categoryTasks.filter((t) => t.status === 'snoozed').length}
+            Snoozed · {categoryTasks.filter((t) => t.isSnoozed).length}
           </button>
           <p>
             {filtered
@@ -261,7 +273,10 @@ function Homebase() {
                 >
                   <strong>{lastDone(task, display)}</strong>
                   <span>{dueLabel(task)}</span>
-                  {task.status === 'snoozed' && task.snoozedUntil && (
+                  {task.isOutOfSeason && (
+                    <span className="state-label">Out of season</span>
+                  )}
+                  {task.isSnoozed && task.snoozedUntil && (
                     <span className="state-label">
                       Snoozed until {fullDate(task.snoozedUntil)}
                     </span>

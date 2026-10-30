@@ -5,6 +5,7 @@ mod database;
 mod error;
 mod library;
 mod schedule;
+mod seasons;
 mod settings;
 mod state;
 mod tasks;

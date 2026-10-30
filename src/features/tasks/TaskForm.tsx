@@ -19,6 +19,7 @@ export function TaskForm({
   onClose: () => void;
 }) {
   const initial: TaskInput = {
+    activeMonths: task?.activeMonths ?? [],
     id: task?.id ?? null,
     title: task?.title ?? '',
     categoryId: task?.categoryId ?? 1,
@@ -210,6 +211,46 @@ export function TaskForm({
                 setInput((old) => ({ ...old, comingUpDays, graceDays }))
               }
             />
+          </details>
+          <details>
+            <summary>Seasonal months</summary>
+            <p className="hint">
+              Choose the months this task is relevant. Leave all unchecked for
+              all year.
+            </p>
+            <div className="month-picker">
+              {[
+                'Jan',
+                'Feb',
+                'Mar',
+                'Apr',
+                'May',
+                'Jun',
+                'Jul',
+                'Aug',
+                'Sep',
+                'Oct',
+                'Nov',
+                'Dec',
+              ].map((month, i) => (
+                <button
+                  type="button"
+                  key={month}
+                  aria-pressed={input.activeMonths.includes(i + 1)}
+                  className={input.activeMonths.includes(i + 1) ? 'chosen' : ''}
+                  onClick={() =>
+                    update(
+                      'activeMonths',
+                      input.activeMonths.includes(i + 1)
+                        ? input.activeMonths.filter((m) => m !== i + 1)
+                        : [...input.activeMonths, i + 1].sort((a, b) => a - b),
+                    )
+                  }
+                >
+                  {month}
+                </button>
+              ))}
+            </div>
           </details>
         </fieldset>
         {error && (

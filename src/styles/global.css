@@ -740,3 +740,20 @@ main > :not(.task-list) {
 .snoozed .completion-value strong {
   color: #657980;
 }
+.month-picker {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.month-picker button {
+  font-size: 12px;
+  padding: 8px;
+}
+.month-picker .chosen {
+  background: #d8e1cf;
+  border-color: #8c9e83;
+}
+.outOfSeason .completion-value strong {
+  color: #76776d;
+}

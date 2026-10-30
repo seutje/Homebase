@@ -14,9 +14,7 @@ export function SnoozeForm({
   onSave: (until: string | null) => Promise<void>;
   onClose: () => void;
 }) {
-  const [until, setUntil] = useState(
-    task.status === 'snoozed' ? task.snoozedUntil! : '',
-  );
+  const [until, setUntil] = useState(task.isSnoozed ? task.snoozedUntil! : '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const save = async (value: string | null) => {
@@ -65,7 +63,7 @@ export function SnoozeForm({
           </p>
         )}
         <footer className="dialog-footer">
-          {task.status === 'snoozed' && (
+          {task.isSnoozed && (
             <button
               type="button"
               disabled={busy}

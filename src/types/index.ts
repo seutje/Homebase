@@ -1,13 +1,18 @@
 export type Schedule =
   | { kind: 'relative'; value: number; unit: 'days' | 'weeks' | 'months' }
   | { kind: 'weekly'; weekday: number };
-export type Status = 'attention' | 'upcoming' | 'good' | 'grace' | 'snoozed';
+export type Status =
+  'attention' | 'upcoming' | 'good' | 'grace' | 'snoozed' | 'outOfSeason';
 export type UrgencyDefaults = {
   comingUpDays: number | null;
   graceDays: number;
 };
 export type Category = { id: number; name: string };
 export type Task = {
+  activeMonths: number[];
+  isSnoozed: boolean;
+  isOutOfSeason: boolean;
+  recurrenceDue: string;
   id: number;
   title: string;
   categoryId: number;
@@ -25,6 +30,7 @@ export type Task = {
   graceDays: number | null;
 };
 export type TaskInput = {
+  activeMonths: number[];
   id: number | null;
   title: string;
   categoryId: number;

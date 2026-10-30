@@ -89,7 +89,8 @@ export function TaskDetail({
           </button>
         </header>
         <h2>{task.title}</h2>
-        {task.status === 'snoozed' && task.snoozedUntil && (
+        {task.isOutOfSeason && <p className="state-label">Out of season</p>}
+        {task.isSnoozed && task.snoozedUntil && (
           <p className="state-label">
             Snoozed until {fullDate(task.snoozedUntil)}
           </p>
@@ -97,6 +98,30 @@ export function TaskDetail({
         <p className="muted small">
           {task.categoryName} · {recurrence(task.schedule)}
         </p>
+        {task.activeMonths.length > 0 && task.activeMonths.length < 12 && (
+          <p className="hint">
+            Active months:{' '}
+            {task.activeMonths
+              .map(
+                (m) =>
+                  [
+                    'Jan',
+                    'Feb',
+                    'Mar',
+                    'Apr',
+                    'May',
+                    'Jun',
+                    'Jul',
+                    'Aug',
+                    'Sep',
+                    'Oct',
+                    'Nov',
+                    'Dec',
+                  ][m - 1],
+              )
+              .join(', ')}
+          </p>
+        )}
         <div className={`detail-timing ${task.status}`}>
           <div className="completion-value">
             <strong>{lastDone(task, display)}</strong>
@@ -123,6 +148,12 @@ export function TaskDetail({
           Edit task
         </button>
         <h3>Completion history</h3>
+        {task.recurrenceDue !== task.nextDue && (
+          <p className="hint">
+            Previously due {fullDate(task.recurrenceDue)}; carried forward to
+            this season’s start on {fullDate(task.nextDue)}.
+          </p>
+        )}
         {error && (
           <p className="error" role="alert">
             {error}
