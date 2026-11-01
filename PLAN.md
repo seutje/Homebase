@@ -150,3 +150,10 @@ Release: package the completion-date changes as v0.2.2, synchronizing npm/Cargo/
 - [x] Verify frontend/native tests and checks plus ordinary/minimum native layouts; commit both features together.
 
 Verified: 15 frontend tests, 27 native tests, lint, formatting, and production build passed. Native backup tests required normal filesystem permissions for temporary-file renames. Playwright CLI exercised category-aware creation, untracked reload persistence, details, first completion/Undo, filtering, and 1180 × 800 / 900 × 600 WebView layouts. No schema change or fabricated history is needed. No installer was built for this change.
+
+Release preparation: v0.3.0 synchronizes npm/Cargo/Tauri manifests and lockfiles
+and includes the untracked-task and category-aware creation changes. Version/tag
+validation, both release checks, all 15 frontend tests, all 27 native tests,
+formatting, lint, and the production build passed. Native backup tests again
+required normal filesystem permissions. Installer building, signing, and publishing
+run in the tag-triggered GitHub workflow; no local packaged-app check was repeated.
