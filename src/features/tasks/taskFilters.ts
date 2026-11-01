@@ -36,6 +36,10 @@ export function sortTasks(tasks: Task[], order: SortMode): Task[] {
             : 1;
       return b.elapsedDays - a.elapsedDays || titleOrder(a, b);
     }
+    if (a.status === 'untracked' || b.status === 'untracked') {
+      if (a.status === b.status) return titleOrder(a, b);
+      return a.status === 'untracked' ? 1 : -1;
+    }
     return a.daysUntilDue - b.daysUntilDue || titleOrder(a, b);
   });
 }

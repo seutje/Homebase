@@ -2,7 +2,13 @@ export type Schedule =
   | { kind: 'relative'; value: number; unit: 'days' | 'weeks' | 'months' }
   | { kind: 'weekly'; weekday: number };
 export type Status =
-  'attention' | 'upcoming' | 'good' | 'grace' | 'snoozed' | 'outOfSeason';
+  | 'attention'
+  | 'upcoming'
+  | 'good'
+  | 'grace'
+  | 'snoozed'
+  | 'outOfSeason'
+  | 'untracked';
 export type UrgencyDefaults = {
   comingUpDays: number | null;
   graceDays: number;

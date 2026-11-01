@@ -8,12 +8,14 @@ import type { Category, Schedule, Task, TaskInput } from '../../types';
 export function TaskForm({
   task,
   categories,
+  defaultCategoryId = 1,
   today,
   onSaved,
   onClose,
 }: {
   task?: Task;
   categories: Category[];
+  defaultCategoryId?: number;
   today: string;
   onSaved: () => Promise<void>;
   onClose: () => void;
@@ -24,7 +26,7 @@ export function TaskForm({
     activeMonths: task?.activeMonths ?? [],
     id: task?.id ?? null,
     title: task?.title ?? '',
-    categoryId: task?.categoryId ?? 1,
+    categoryId: task?.categoryId ?? defaultCategoryId,
     schedule: task?.schedule ?? { kind: 'relative', value: 7, unit: 'days' },
     trackingStartOn: task?.trackingStartOn ?? today,
     initialCompletedOn: null,
@@ -209,7 +211,9 @@ export function TaskForm({
               />
             </label>
             <p className="hint">
-              Without a completion, the first relative due date is this date.
+              Tasks without completion history stay Not yet tracked. Record a
+              completion to start tracking due dates; this date also sets the
+              earliest weekly occurrence.
             </p>
           </details>
           <details>

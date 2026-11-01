@@ -34,6 +34,19 @@ function task(
   };
 }
 describe('task search and ordering', () => {
+  it('keeps untracked tasks after dated tasks for due sorts', () => {
+    const untracked = {
+      ...task(1, 'Untracked', null, -100),
+      status: 'untracked' as const,
+    };
+    for (const order of ['due', 'overdue'] as const) {
+      expect(
+        sortTasks([untracked, task(2, 'Tracked', 1, 6)], order).map(
+          (t) => t.id,
+        ),
+      ).toEqual([2, 1]);
+    }
+  });
   it('matches titles/categories case-insensitively and searches notes only when selected', () => {
     const value = task(1, 'Clean washer', 2, 5, 'Laundry');
     expect(matchesSearch(value, ' WASHER ', false)).toBe(true);

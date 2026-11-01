@@ -7,7 +7,9 @@ TypeScript, and SQLite. See DESIGN.md for behavior and PLAN.md for delivery stat
 
 Add a task yourself or browse the 26 suggested chores. Choose an interval after
 the last completion, or a weekly weekday. The task list always shows when each
-chore was last done; switch between elapsed days and dates in Settings.
+chore was last done; switch between elapsed days and dates in Settings. Tasks
+without completion history stay Not yet tracked, with no due warnings, until
+you record a completion. Adding a task from a category preselects that category.
 
 Click Done to record today. The adjacent arrow records another date. Undo is
 available for ten seconds, and clicking a task opens its editable completion

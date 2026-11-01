@@ -43,7 +43,7 @@ No desktop notifications in either initial scope. “Due” means an in-app stat
 +--------------------+-------------------------------------------------------+
 ```
 
-The illustrative numbers above are not seeded data. Use “Needs attention” as the first tile's actual label; it includes due today, overdue, and tasks with no completion yet whose start date has arrived. Tile counts follow the selected category and, in v2, search; status filters do not change their own counts. Clicking a tile toggles that status filter. Clicking it again clears the filter. Show “Showing X of Y” and a Clear filters action whenever filtered.
+The illustrative numbers above are not seeded data. Use “Needs attention” as the first tile's actual label; it includes due today and overdue, and excludes tasks with no completion history. Tile counts follow the selected category and, in v2, search; status filters do not change their own counts. Clicking a tile toggles that status filter. Clicking it again clears the filter. Show “Showing X of Y” and a Clear filters action whenever filtered.
 
 ### Task row
 
@@ -66,7 +66,7 @@ Use Segoe UI/system fonts with approximately 15px body text, 17px task titles, a
 
 Start with an empty task list, not fictional completion history. Offer Add task and Browse suggested chores. Seed the editable category list once: Laundry, Kitchen, Bathrooms, General Cleaning, Home Maintenance, Life Admin, Personal Care, and Dog Care. Also provide an Uncategorized fallback.
 
-Task creation requires a trimmed, nonempty title and a recurrence. Category defaults to Uncategorized. Relative recurrence defaults to every 7 days. The user can optionally supply a last-completed date; that creates a real history entry. Otherwise show Never completed and start tracking today. An expandable start-date field allows a future first due date.
+Task creation requires a trimmed, nonempty title and a recurrence. Category defaults to the selected sidebar category, or Uncategorized in All tasks. Editing preserves the task’s existing category. Relative recurrence defaults to every 7 days. The user can optionally supply a last-completed date; that creates a real history entry. Otherwise show Never completed with a neutral Not yet tracked status until a real completion is recorded. This applies to existing tasks and library additions too. Exclude these tasks from active urgency counts and provide a Not yet tracked filter. Keep Done and backdating available; snooze and season flags remain independently visible/filterable. An expandable start-date field sets the earliest weekly occurrence.
 
 Editing a recurrence recalculates due status immediately from existing history; it never creates a completion. Confirm before discarding an edited form. Duplicate task names are allowed because the same chore may exist in different rooms.
 
@@ -82,7 +82,7 @@ Editing a recurrence recalculates due status immediately from existing history; 
 
 ### Task detail and history
 
-Show title, category, last completion, next due date, recurrence, Done, Complete on another date, Edit task, and completion history newest first. History entries show unambiguous full dates with Edit date and Delete actions. Confirm history deletion; date corrections reject future or duplicate dates. Changing/deleting the newest entry immediately recalculates elapsed time and due date. If all history is removed, return to Never completed and use the task's start date for its first due date.
+Show title, category, last completion, next due date, recurrence, Done, Complete on another date, Edit task, and completion history newest first. History entries show unambiguous full dates with Edit date and Delete actions. Confirm history deletion; date corrections reject future or duplicate dates. Changing/deleting the newest entry immediately recalculates elapsed time and due date. If all history is removed or the first completion is undone, return to Never completed / Not yet tracked.
 
 Deleting a task requires confirmation explaining that its history will also be deleted. Category deletion offers moving its tasks to another category, defaulting to Uncategorized; execute reassignment and deletion together. Protect Uncategorized from deletion. Renaming a category preserves all task associations. No archive system in v1.
 
@@ -95,7 +95,7 @@ All domain calculations belong in Rust and receive an explicit local `today` for
 Support a positive whole number of days, weeks, or months. Every 3 days, every 2 weeks, and every 6 months are valid. Use 1–3650 days, 1–520 weeks, or 1–120 months as practical input limits.
 
 - With history: next due = latest completed date plus the interval.
-- Without history: first due = tracking start date. The interval begins once the task is completed; do not invent a last completion.
+- Without history: status is Not yet tracked; no due warning is displayed. The start date remains an internal recurrence anchor, not an actionable due date. The interval begins once the task is completed; do not invent a last completion.
 - Weeks mean seven calendar days. Months mean calendar-month addition, clamping to the target month's last day. January 31 + one month is February 28 (29 in a leap year); August 31 + six months similarly clamps to February's end.
 - Each next due is calculated from the latest actual completion, so a late completion shifts relative recurrence. There is no independent monthly anchor to preserve.
 
@@ -103,7 +103,7 @@ Support a positive whole number of days, weeks, or months. Every 3 days, every 2
 
 V1 supports one weekday every week, such as Every Sunday. More elaborate calendar rules are out of scope.
 
-- Without history, first due is the selected weekday on or after tracking start.
+- Without history, status is Not yet tracked. The selected weekday on or after tracking start remains an internal anchor; due status begins with the first real completion.
 - With history, next due is the first selected weekday that is both strictly after the latest completion and on or after tracking start.
 - A missed occurrence stays overdue until completion; do not roll it forward automatically each week and do not generate a backlog of individual occurrences.
 - Completion on a due Sunday advances to the following Sunday. Completion on a late Tuesday advances to the next Sunday, preserving the weekday rather than adding seven days.
@@ -112,7 +112,7 @@ V1 supports one weekday every week, such as Every Sunday. More elaborate calenda
 
 ### Status and ordering
 
-Let `days_until_due = next_due - today`.
+Tasks without completion history have Not yet tracked status, taking precedence over urgency, snooze, and season status while preserving their independent flags. Suppress due-date text in rows/details for these tasks. With history, let `days_until_due = next_due - today`.
 
 | Condition                      | Status          | Display        |
 | ------------------------------ | --------------- | -------------- |
@@ -123,7 +123,7 @@ Let `days_until_due = next_due - today`.
 
 The default coming-up window is `min(7, max(1, ceil(interval_days × 0.2)))`. Relative month intervals use the actual span from latest completion to next due; when never completed, use the span from start to start + interval. Weekly calendar schedules use 7 interval days. Never completed remains the main completion label regardless of status.
 
-V1 sorts by next due ascending, then title case-insensitively, then ID for stable ties. Do not hide tasks because they are healthy or have never been completed. No stored urgency flags or stored elapsed-day counters.
+Default ordering sorts tracked tasks by next due ascending, then title case-insensitively, then ID for stable ties. Untracked tasks follow dated tasks, ordered by title/ID; the most-overdue sort follows the same rule. Do not hide tasks because they are healthy or have never been completed. No stored urgency flags or stored elapsed-day counters.
 
 ### Concrete acceptance examples
 
@@ -133,7 +133,7 @@ With today fixed to **2026-10-30**:
 | ------------------------------------------------------- | ------------------------------------------------------ |
 | Last done October 21, every 7 days                      | 9 days ago; next due October 28; 2 days overdue        |
 | Last done October 24, every 7 days                      | 6 days ago; due October 31; coming up                  |
-| Never completed, start October 30                       | Never completed; due today (relative recurrence)       |
+| Never completed, start October 30                       | Never completed; Not yet tracked                       |
 | Done October 30, then backdate another entry October 27 | Last done remains October 30                           |
 | Delete October 30 above                                 | Last done becomes October 27; all due values recompute |
 | Every Sunday, latest completion October 20              | Due October 25; still overdue October 30               |

@@ -211,6 +211,10 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
         if is_out_of_season {
             timing.status = "outOfSeason";
         }
+        // History is authoritative: without it there is no urgency yet.
+        if last.is_none() {
+            timing.status = "untracked";
+        }
         let (notes, links): (String, String) =
             conn.query_row("SELECT notes,links FROM tasks WHERE id=?1", [id], |r| {
                 Ok((r.get(0)?, r.get(1)?))
@@ -239,8 +243,16 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
     }
     tasks.sort_by(|a, b| {
         a.timing
-            .next_due
-            .cmp(&b.timing.next_due)
+            .last_completed_on
+            .is_none()
+            .cmp(&b.timing.last_completed_on.is_none())
+            .then_with(|| {
+                if a.timing.last_completed_on.is_none() {
+                    std::cmp::Ordering::Equal
+                } else {
+                    a.timing.next_due.cmp(&b.timing.next_due)
+                }
+            })
             .then_with(|| a.title.to_lowercase().cmp(&b.title.to_lowercase()))
             .then(a.id.cmp(&b.id))
     });
@@ -254,6 +266,67 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn untracked_state_survives_restart_and_follows_history() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("untracked.db");
+        let today = date("2026-10-30").unwrap();
+        {
+            let c = crate::database::open(&path).unwrap();
+            for (kind, weekday) in [("relative", "NULL"), ("weekly", "7")] {
+                let interval = if kind == "relative" {
+                    "7,'days'"
+                } else {
+                    "NULL,NULL"
+                };
+                c.execute(&format!("INSERT INTO tasks(title,category_id,schedule_kind,interval_value,interval_unit,weekday,tracking_start_on,created_at,updated_at) VALUES ('New chore',1,'{kind}',{interval},{weekday},'2020-01-01','now','now')"), []).unwrap();
+            }
+        }
+        let mut c = crate::database::open(&path).unwrap();
+        for task in list(&c, today).unwrap().tasks {
+            assert_eq!(task.timing.status, "untracked");
+            assert_eq!(task.timing.elapsed_days, None);
+            let recorded =
+                crate::completions::record(&mut c, task.id, "2026-10-21", today).unwrap();
+            assert_eq!(
+                list(&c, today)
+                    .unwrap()
+                    .tasks
+                    .iter()
+                    .find(|t| t.id == task.id)
+                    .unwrap()
+                    .timing
+                    .status,
+                "attention"
+            );
+            crate::completions::undo(&mut c, recorded.id, today).unwrap();
+            assert_eq!(
+                list(&c, today)
+                    .unwrap()
+                    .tasks
+                    .iter()
+                    .find(|t| t.id == task.id)
+                    .unwrap()
+                    .timing
+                    .status,
+                "untracked"
+            );
+            let recorded =
+                crate::completions::record(&mut c, task.id, "2026-10-30", today).unwrap();
+            crate::completions::delete(&mut c, recorded.id, today).unwrap();
+            assert_eq!(
+                list(&c, today)
+                    .unwrap()
+                    .tasks
+                    .iter()
+                    .find(|t| t.id == task.id)
+                    .unwrap()
+                    .timing
+                    .status,
+                "untracked"
+            );
+        }
+    }
     #[test]
     fn notes_links_persist_and_invalid_link_edits_do_not_overwrite_them() {
         let dir = tempfile::tempdir().unwrap();
@@ -319,7 +392,7 @@ mod tests {
         let task = list(&c, today).unwrap().tasks.remove(0);
         assert!(task.is_out_of_season);
         assert!(task.is_snoozed);
-        assert_eq!(task.timing.status, "outOfSeason");
+        assert_eq!(task.timing.status, "untracked");
         assert!(task.timing.last_completed_on.is_none());
         let task = list(&c, date("2026-11-06").unwrap())
             .unwrap()

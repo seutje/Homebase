@@ -56,6 +56,60 @@ afterEach(() => {
 });
 
 describe('completion workflows', () => {
+  it('preselects the filtered category, preserves edit categories, and defaults All tasks to Uncategorized', async () => {
+    const user = userEvent.setup();
+    const save = vi.spyOn(api, 'saveTask').mockResolvedValue(4);
+    vi.spyOn(api, 'history').mockResolvedValue([]);
+    render(<App />);
+    await screen.findByText(/^9 days ago/);
+    await user.click(screen.getByRole('button', { name: /Laundry\s*1/ }));
+    await user.click(screen.getByRole('button', { name: '+ Add task' }));
+    expect(screen.getByLabelText('Category')).toHaveValue('2');
+    await user.type(screen.getByLabelText('Task name'), 'New chore');
+    await user.click(screen.getByRole('button', { name: 'Save task' }));
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith(
+        expect.objectContaining({ categoryId: 2 }),
+      ),
+    );
+    await user.click(screen.getByRole('button', { name: /All tasks\s*1/ }));
+    await user.click(screen.getByRole('button', { name: '+ Add task' }));
+    expect(screen.getByLabelText('Category')).toHaveValue('1');
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    await user.click(
+      screen.getByRole('button', { name: /Wash bedsheets\s*Every/ }),
+    );
+    await user.click(screen.getByRole('button', { name: 'Edit task' }));
+    expect(screen.getByLabelText('Category')).toHaveValue('2');
+  });
+  it('shows an untracked task calmly in the list, filter, and details', async () => {
+    task = {
+      ...task,
+      lastCompletedOn: null,
+      elapsedDays: null,
+      status: 'untracked',
+    };
+    vi.spyOn(api, 'history').mockResolvedValue([]);
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByText('Never completed');
+    expect(screen.getByText('Not yet tracked')).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: /0\s*Needs attention/ }),
+    ).toBeVisible();
+    expect(screen.queryByText(/days overdue/)).toBeNull();
+    await user.click(
+      screen.getByRole('button', { name: 'Not yet tracked · 1' }),
+    );
+    expect(screen.getByRole('button', { name: /^Done$/ })).toBeEnabled();
+    await user.click(
+      screen.getByRole('button', { name: /Wash bedsheets\s*Every/ }),
+    );
+    await screen.findByText(
+      /Record a completion to start tracking due dates\./,
+    );
+    expect(screen.queryByText(/Next due:/)).toBeNull();
+  });
   it('combines optional notes search with category/status filtering and clear filters', async () => {
     const user = userEvent.setup();
     task.notes = 'Use Affresh tablet';

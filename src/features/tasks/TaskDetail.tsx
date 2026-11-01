@@ -131,7 +131,9 @@ export function TaskDetail({
             Last completed:{' '}
             {task.lastCompletedOn ? fullDate(task.lastCompletedOn) : 'Never'}
             <br />
-            Next due: {fullDate(task.nextDue)}
+            {task.status === 'untracked'
+              ? 'Record a completion to start tracking due dates.'
+              : `Next due: ${fullDate(task.nextDue)}`}
           </p>
         </div>
         <CompletionActions
@@ -174,7 +176,7 @@ export function TaskDetail({
           </section>
         )}
         <h3>Completion history</h3>
-        {task.recurrenceDue !== task.nextDue && (
+        {task.status !== 'untracked' && task.recurrenceDue !== task.nextDue && (
           <p className="hint">
             Previously due {fullDate(task.recurrenceDue)}; carried forward to
             this season’s start on {fullDate(task.nextDue)}.

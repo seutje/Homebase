@@ -142,3 +142,11 @@ All 12 frontend tests, lint, formatting, and the production build passed. Playwr
 Follow-up: disable emergency word wrapping on completion labels so the nonbreaking space between day and month also prevents the parenthesized date from splitting on narrow rows.
 
 Release: package the completion-date changes as v0.2.2, synchronizing npm/Cargo/Tauri manifests and lockfiles. Preserve published v0.2.1; push the new tag to run the signed release workflow.
+
+## Phase 13 — Calm untracked tasks and category-aware creation
+
+- [x] Derive Not yet tracked from absent completion history, exclude it from urgency counts, suppress due warnings, and provide a filter. Preserve completion/history, seasonal, and snooze behavior.
+- [x] Default new task category to the selected sidebar category; preserve Uncategorized in All tasks and existing categories on edits.
+- [x] Verify frontend/native tests and checks plus ordinary/minimum native layouts; commit both features together.
+
+Verified: 15 frontend tests, 27 native tests, lint, formatting, and production build passed. Native backup tests required normal filesystem permissions for temporary-file renames. Playwright CLI exercised category-aware creation, untracked reload persistence, details, first completion/Undo, filtering, and 1180 × 800 / 900 × 600 WebView layouts. No schema change or fabricated history is needed. No installer was built for this change.

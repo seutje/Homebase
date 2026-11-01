@@ -38,6 +38,7 @@ export function lastDone(task: Task, mode: Display): string {
   return `${relative} (${date.getDate()}\u00a0${month})`;
 }
 export function dueLabel(task: Task): string {
+  if (task.status === 'untracked') return 'Not yet tracked';
   if (task.status === 'grace')
     return `Due within grace · ${actualDueLabel(task)}`;
   return actualDueLabel(task);

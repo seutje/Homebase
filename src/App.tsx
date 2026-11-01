@@ -92,7 +92,11 @@ function Homebase() {
   const visible = sortTasks(
     status
       ? categoryTasks.filter((t) =>
-          status === 'snoozed' ? t.isSnoozed : t.status === status,
+          status === 'snoozed'
+            ? t.isSnoozed
+            : status === 'outOfSeason'
+              ? t.isOutOfSeason
+              : t.status === status,
         )
       : categoryTasks,
     sort,
@@ -222,6 +226,17 @@ function Homebase() {
           ))}
         </div>
         <div className="list-toolbar">
+          {categoryTasks.some((t) => t.status === 'untracked') && (
+            <button
+              className={`filter-chip ${status === 'untracked' ? 'active' : ''}`}
+              onClick={() =>
+                setStatus(status === 'untracked' ? null : 'untracked')
+              }
+            >
+              Not yet tracked ·{' '}
+              {categoryTasks.filter((t) => t.status === 'untracked').length}
+            </button>
+          )}
           {categoryTasks.some((t) => t.isOutOfSeason) && (
             <button
               className={`filter-chip ${status === 'outOfSeason' ? 'active' : ''}`}
@@ -383,6 +398,7 @@ function Homebase() {
         <TaskForm
           task={form === 'new' ? undefined : form}
           categories={categories}
+          defaultCategoryId={activeCategory?.id}
           today={data.asOfDate}
           onSaved={refresh}
           onClose={() => setForm(null)}
