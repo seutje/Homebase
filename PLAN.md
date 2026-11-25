@@ -165,3 +165,9 @@ run in the tag-triggered GitHub workflow; no local packaged-app check was repeat
 - [x] Verify migration, persistence, backup round-trip, combined filters, failed saves, and native ordinary/minimum layouts.
 
 Verified: 17 frontend tests and 29 native tests passed, along with lint, formatting, and the production build. Playwright CLI exercised the real Tauri WebView with an isolated QA database: default floor, creation/editing, persisted reloads, combined category/search/status/floor filters, and Clear filters. Screenshots at 1180 × 800 and 900 × 600 confirm readable completion labels and usable Done controls; the minimum-size task editor was also inspected. Existing task/history migration and backup round-trip retain floor values. No installer was built or release published.
+
+Release preparation: v0.4.0 synchronizes npm/Cargo/Tauri manifests and lockfiles
+for the task-floor changes. Version/tag validation, both release checks, and
+formatting passed. Application tests and packaged-app checks were not repeated
+for this version-only change. The release commit and tag are local; publishing
+requires pushing the tag to run the signed GitHub release workflow.
