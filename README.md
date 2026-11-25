@@ -125,11 +125,11 @@ the connected GitHub tools cannot manage secrets. `GITHUB_TOKEN` is supplied
 automatically by Actions.
 
 ```powershell
-npm run version:check -- v0.4.0
+npm run version:check -- v0.4.1
 npm run release:build  # local signed installer using the files above
 git push origin main
-git tag v0.4.0
-git push origin v0.4.0
+git tag v0.4.1
+git push origin v0.4.1
 ```
 
 For subsequent releases, update all five version locations together before
