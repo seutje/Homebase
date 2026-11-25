@@ -3,7 +3,14 @@ import { Dialog, useConfirm } from '../../components/Dialog';
 import { api, errorMessage } from '../../lib/api';
 import { weekdays } from '../../lib/format';
 import { UrgencyFields } from '../../components/UrgencyFields';
-import type { Category, Schedule, Task, TaskInput } from '../../types';
+import {
+  floors,
+  type Floor,
+  type Category,
+  type Schedule,
+  type Task,
+  type TaskInput,
+} from '../../types';
 
 export function TaskForm({
   task,
@@ -21,6 +28,7 @@ export function TaskForm({
   onClose: () => void;
 }) {
   const initial: TaskInput = {
+    floor: task?.floor ?? '1st floor',
     notes: task?.notes ?? '',
     links: task?.links ?? [],
     activeMonths: task?.activeMonths ?? [],
@@ -98,6 +106,17 @@ export function TaskForm({
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Floor
+            <select
+              value={input.floor}
+              onChange={(e) => update('floor', e.target.value as Floor)}
+            >
+              {floors.map((floor) => (
+                <option key={floor}>{floor}</option>
               ))}
             </select>
           </label>

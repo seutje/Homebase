@@ -157,3 +157,11 @@ validation, both release checks, all 15 frontend tests, all 27 native tests,
 formatting, lint, and the production build passed. Native backup tests again
 required normal filesystem permissions. Installer building, signing, and publishing
 run in the tag-triggered GitHub workflow; no local packaged-app check was repeated.
+
+## Phase 14 — Task floors and overview filtering
+
+- [x] Add a numbered migration with 1st floor defaults for existing/new tasks and suggested chores, plus validated task saves.
+- [x] Add floor selection to task forms, show floors in rows/details, and combine an overview floor filter with existing filters and summary counts.
+- [x] Verify migration, persistence, backup round-trip, combined filters, failed saves, and native ordinary/minimum layouts.
+
+Verified: 17 frontend tests and 29 native tests passed, along with lint, formatting, and the production build. Playwright CLI exercised the real Tauri WebView with an isolated QA database: default floor, creation/editing, persisted reloads, combined category/search/status/floor filters, and Clear filters. Screenshots at 1180 × 800 and 900 × 600 confirm readable completion labels and usable Done controls; the minimum-size task editor was also inspected. Existing task/history migration and backup round-trip retain floor values. No installer was built or release published.

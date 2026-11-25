@@ -14,7 +14,16 @@ export type UrgencyDefaults = {
   graceDays: number;
 };
 export type Category = { id: number; name: string };
+export const floors = [
+  '1st floor',
+  '2nd floor',
+  'Basement',
+  'Garage',
+  'Outside',
+] as const;
+export type Floor = (typeof floors)[number];
 export type Task = {
+  floor: Floor;
   notes: string;
   links: string[];
   activeMonths: number[];
@@ -38,6 +47,7 @@ export type Task = {
   graceDays: number | null;
 };
 export type TaskInput = {
+  floor: Floor;
   notes: string;
   links: string[];
   activeMonths: number[];

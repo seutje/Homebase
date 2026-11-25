@@ -196,6 +196,7 @@ mod tests {
         crate::tasks::save(
             &mut c,
             &crate::tasks::TaskInput {
+                floor: "Garage".into(),
                 notes: String::new(),
                 links: vec![],
                 active_months: vec![],
@@ -232,6 +233,10 @@ mod tests {
                 .timing
                 .elapsed_days,
             Some(9)
+        );
+        assert_eq!(
+            crate::tasks::list(&c, today).unwrap().tasks[0].floor,
+            "Garage"
         );
         assert_eq!(crate::settings::display(&c).unwrap(), "date");
         let safety = Connection::open(safety).unwrap();

@@ -760,6 +760,7 @@ main > :not(.task-list) {
 }
 .search-toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: end;
   gap: 16px;
   margin-bottom: 20px;
@@ -772,6 +773,9 @@ main > :not(.task-list) {
 .search-field {
   flex: 1;
   min-width: 140px;
+}
+.floor-field {
+  width: 125px;
 }
 .sort-field {
   width: 170px;

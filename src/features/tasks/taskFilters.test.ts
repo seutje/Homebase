@@ -15,6 +15,7 @@ function task(
     elapsedDays: elapsed,
     daysUntilDue: due,
     categoryName,
+    floor: '1st floor',
     notes: 'Use Affresh tablet',
     links: [],
     categoryId: 1,

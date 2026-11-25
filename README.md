@@ -13,13 +13,15 @@ you record a completion. Adding a task from a category preselects that category.
 
 Click Done to record today. The adjacent arrow records another date. Undo is
 available for ten seconds, and clicking a task opens its editable completion
-history. Categories and status tiles filter the list; All tasks is always available.
+history. Categories, floors, and status tiles filter the list; All tasks is always available.
+Tasks default to 1st floor, with 2nd floor, Basement, Garage, and Outside also
+available in the task editor. Existing tasks and suggested chores start on 1st floor.
 
 Settings includes Export backup, Restore backup, and Open data folder. Homebase
 keeps `homebase.db` in its resolved Windows app-data directory (normally
 `%APPDATA%\local.homebase.desktop`). Backups include all history and preferences.
 Restore validates a staged copy and retains your previous data in the `backups`
-subfolder before applying it. Schemas 1–4 are supported (older ones migrate in
+subfolder before applying it. Schemas 1–5 are supported (older ones migrate in
 staging); newer-schema files are rejected. Keep occasional exported copies somewhere safe.
 
 Tasks work offline, with no account, background service, or notifications.

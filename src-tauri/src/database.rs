@@ -2,7 +2,7 @@ use crate::error::{AppError, Result};
 use rusqlite::Connection;
 use std::path::Path;
 
-pub const SCHEMA_VERSION: i64 = 4;
+pub const SCHEMA_VERSION: i64 = 5;
 pub fn open(path: &Path) -> Result<Connection> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
@@ -36,6 +36,9 @@ pub fn migrate(conn: &mut Connection) -> Result<()> {
     if version < 4 {
         apply(conn, include_str!("../migrations/0004_notes_links.sql"), 4)?;
     }
+    if version < 5 {
+        apply(conn, include_str!("../migrations/0005_task_floor.sql"), 5)?;
+    }
     Ok(())
 }
 fn apply(conn: &mut Connection, sql: &str, version: i64) -> Result<()> {
@@ -65,6 +68,31 @@ mod tests {
             "My kitchen"
         );
     }
+    #[test]
+    fn v4_floor_upgrade_preserves_tasks_history_and_defaults() {
+        let mut c = Connection::open_in_memory().unwrap();
+        for sql in [
+            include_str!("../migrations/0001_initial.sql"),
+            include_str!("../migrations/0002_snooze_urgency.sql"),
+            include_str!("../migrations/0003_seasons.sql"),
+            include_str!("../migrations/0004_notes_links.sql"),
+        ] {
+            c.execute_batch(sql).unwrap();
+        }
+        c.pragma_update(None, "user_version", 4).unwrap();
+        c.execute("INSERT INTO tasks(title,category_id,schedule_kind,interval_value,interval_unit,tracking_start_on,created_at,updated_at) VALUES ('Existing',1,'relative',7,'days','2026-11-01','now','now')", []).unwrap();
+        c.execute("INSERT INTO completions(task_id,completed_on,created_at,updated_at) VALUES (1,'2026-11-21','now','now')", []).unwrap();
+        migrate(&mut c).unwrap();
+        migrate(&mut c).unwrap();
+        let task = crate::tasks::list(&c, crate::schedule::date("2026-11-25").unwrap())
+            .unwrap()
+            .tasks
+            .remove(0);
+        assert_eq!(task.floor, "1st floor");
+        assert_eq!(task.timing.last_completed_on.as_deref(), Some("2026-11-21"));
+        assert_eq!(task.title, "Existing");
+    }
+
     #[test]
     fn fresh_reopen_and_seed_once() {
         let dir = tempfile::tempdir().unwrap();

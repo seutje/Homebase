@@ -18,6 +18,7 @@ beforeEach(() => {
   };
   task = {
     id: 3,
+    floor: '1st floor',
     notes: '',
     links: [],
     activeMonths: [],
@@ -56,6 +57,70 @@ afterEach(() => {
 });
 
 describe('completion workflows', () => {
+  it('defaults new floors, preserves edits and retains input after a failed save', async () => {
+    const user = userEvent.setup();
+    const save = vi
+      .spyOn(api, 'saveTask')
+      .mockRejectedValue({ message: 'Could not save task.' });
+    vi.spyOn(api, 'history').mockResolvedValue([]);
+    task.floor = 'Garage';
+    render(<App />);
+    await screen.findByText(/^9 days ago/);
+    await user.click(screen.getByRole('button', { name: '+ Add task' }));
+    expect(screen.getAllByLabelText('Floor')[1]).toHaveValue('1st floor');
+    await user.type(screen.getByLabelText('Task name'), 'New floor chore');
+    await user.selectOptions(screen.getAllByLabelText('Floor')[1], 'Basement');
+    await user.click(screen.getByRole('button', { name: 'Save task' }));
+    await screen.findByText('Could not save task.');
+    expect(screen.getAllByLabelText('Floor')[1]).toHaveValue('Basement');
+    expect(screen.getByLabelText('Task name')).toHaveValue('New floor chore');
+    save.mockResolvedValue(4);
+    await user.click(screen.getByRole('button', { name: 'Save task' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(save).toHaveBeenLastCalledWith(
+      expect.objectContaining({ floor: 'Basement' }),
+    );
+    await user.click(
+      screen.getByRole('button', { name: /Wash bedsheets\s*Every/ }),
+    );
+    await user.click(screen.getByRole('button', { name: 'Edit task' }));
+    expect(screen.getAllByLabelText('Floor')[1]).toHaveValue('Garage');
+  });
+  it('combines floor with category, search and status, updates counts, and clears it', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(api, 'tasks').mockImplementation(async () => ({
+      asOfDate: '2026-10-30',
+      tasks: [
+        task,
+        { ...task, id: 4, title: 'Garage shelves', floor: 'Garage' },
+      ],
+      urgencyDefaults: { comingUpDays: null, graceDays: 0 },
+    }));
+    render(<App />);
+    await screen.findByText('Garage shelves');
+    expect(screen.getByLabelText('Floor')).toHaveValue('');
+    await user.selectOptions(screen.getByLabelText('Floor'), 'Garage');
+    expect(screen.queryByText('Wash bedsheets')).toBeNull();
+    expect(screen.getByText(/^9 days ago/)).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: /1\s*Needs attention/ }),
+    ).toBeVisible();
+    await user.click(screen.getByRole('button', { name: /Laundry\s*2/ }));
+    await user.type(
+      screen.getByRole('searchbox', { name: 'Search' }),
+      'shelves',
+    );
+    await user.click(
+      screen.getByRole('button', { name: /1\s*Needs attention/ }),
+    );
+    expect(screen.getByText('Showing 1 of 2')).toBeVisible();
+    await user.selectOptions(screen.getByLabelText('Floor'), 'Outside');
+    expect(screen.getByText('Nothing here right now.')).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Clear filters' }));
+    expect(screen.getByLabelText('Floor')).toHaveValue('');
+    expect(screen.getByText('Wash bedsheets')).toBeVisible();
+    expect(screen.getByText('Garage shelves')).toBeVisible();
+  });
   it('preselects the filtered category, preserves edit categories, and defaults All tasks to Uncategorized', async () => {
     const user = userEvent.setup();
     const save = vi.spyOn(api, 'saveTask').mockResolvedValue(4);

@@ -111,3 +111,7 @@ remain unexercised until signing secrets are configured and a tag is pushed.
 ## Untracked state and category defaults
 
 Run `npx --yes @playwright/cli -s=homebase-features run-code --filename scripts/qa/untracked.js` after attaching to the isolated v2 debug harness. This script uses the actual current date, creates and removes only its named QA fixture, checks category-aware creation and completion/Undo, reload persistence, task details, and ordinary/minimum layouts. It refuses a pre-existing fixture. Screenshots stay under `.qa/`.
+
+## Task floors
+
+Run `npx --yes @playwright/cli -s=homebase-floors run-code --filename scripts/qa/floors.js` after attaching to the isolated v2 debug harness. The script checks the default floor, native create/edit persistence, combined category/search/status/floor filtering, Clear filters, and 1180 × 800 / 900 × 600 layouts. It creates and removes only its named QA task and writes screenshots under `.qa/`.

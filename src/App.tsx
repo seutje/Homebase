@@ -5,7 +5,7 @@ import { CategoryManager } from './features/categories/CategoryManager';
 import { Settings } from './features/settings/Settings';
 import { useHomebase } from './lib/useHomebase';
 import { dueLabel, fullDate, lastDone, recurrence } from './lib/format';
-import type { Status, Task } from './types';
+import { floors, type Floor, type Status, type Task } from './types';
 import { api, errorMessage } from './lib/api';
 import { TaskDetail } from './features/tasks/TaskDetail';
 import { DateForm } from './features/tasks/DateForm';
@@ -46,6 +46,7 @@ function Homebase() {
   const [settings, setSettings] = useState(false);
   const [library, setLibrary] = useState(false);
   const [query, setQuery] = useState('');
+  const [floor, setFloor] = useState<Floor | ''>('');
   const [includeNotes, setIncludeNotes] = useState(false);
   const [sort, setSort] = useState<SortMode>('due');
   const tasks = data?.tasks ?? [];
@@ -86,8 +87,9 @@ function Homebase() {
   const inCategory = activeCategory
     ? tasks.filter((t) => t.categoryId === category)
     : tasks;
-  const categoryTasks = inCategory.filter((t) =>
-    matchesSearch(t, query, includeNotes),
+  const categoryTasks = inCategory.filter(
+    (t) =>
+      (!floor || t.floor === floor) && matchesSearch(t, query, includeNotes),
   );
   const visible = sortTasks(
     status
@@ -101,7 +103,7 @@ function Homebase() {
       : categoryTasks,
     sort,
   );
-  const filtered = !!activeCategory || !!status || !!query.trim();
+  const filtered = !!activeCategory || !!status || !!query.trim() || !!floor;
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -187,6 +189,18 @@ function Homebase() {
               onChange={(e) => setIncludeNotes(e.target.checked)}
             />
             Include notes
+          </label>
+          <label className="floor-field">
+            Floor
+            <select
+              value={floor}
+              onChange={(e) => setFloor(e.target.value as Floor | '')}
+            >
+              <option value="">All floors</option>
+              {floors.map((floor) => (
+                <option key={floor}>{floor}</option>
+              ))}
+            </select>
           </label>
           <label className="sort-field">
             Sort by
@@ -275,6 +289,7 @@ function Homebase() {
                 setCategory(null);
                 setStatus(null);
                 setQuery('');
+                setFloor('');
               }}
             >
               Clear filters
@@ -326,7 +341,8 @@ function Homebase() {
                 >
                   <strong>{task.title}</strong>
                   <span>
-                    {recurrence(task.schedule)} · {task.categoryName}
+                    {recurrence(task.schedule)} · {task.categoryName} ·{' '}
+                    {task.floor}
                   </span>
                 </button>
                 <div
@@ -427,6 +443,7 @@ function Homebase() {
             setCategory(null);
             setStatus(null);
             setQuery('');
+            setFloor('');
             await refresh();
           }}
           onClose={() => setSettings(false)}

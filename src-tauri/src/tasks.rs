@@ -12,6 +12,7 @@ use serde::Serialize;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TaskInput {
+    pub floor: String,
     #[serde(default)]
     pub notes: String,
     #[serde(default)]
@@ -30,7 +31,15 @@ pub struct TaskInput {
     pub grace_days: Option<u32>,
 }
 
+fn validate_floor(floor: &str) -> Result<()> {
+    if !["1st floor", "2nd floor", "Basement", "Garage", "Outside"].contains(&floor) {
+        return Err(AppError::invalid("Choose an existing floor."));
+    }
+    Ok(())
+}
+
 pub fn save(conn: &mut Connection, input: &TaskInput, today: NaiveDate) -> Result<i64> {
+    validate_floor(&input.floor)?;
     crate::notes::validate(&input.notes)?;
     let links = crate::notes::normalize_links(&input.links)?;
     crate::seasons::validate(&input.active_months)?;
@@ -101,6 +110,10 @@ pub fn save(conn: &mut Connection, input: &TaskInput, today: NaiveDate) -> Resul
         "UPDATE tasks SET notes=?1,links=?2 WHERE id=?3",
         params![input.notes, serde_json::to_string(&links).unwrap(), id],
     )?;
+    tx.execute(
+        "UPDATE tasks SET floor=?1 WHERE id=?2",
+        params![input.floor, id],
+    )?;
     tx.commit()?;
     Ok(id)
 }
@@ -115,6 +128,7 @@ pub fn delete(conn: &Connection, id: i64) -> Result<()> {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Task {
+    pub floor: String,
     pub notes: String,
     pub links: Vec<String>,
     pub active_months: Vec<u32>,
@@ -221,7 +235,11 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
             })?;
         crate::notes::validate(&notes)?;
         let links = crate::notes::parse_links(&links)?;
+        let floor: String =
+            conn.query_row("SELECT floor FROM tasks WHERE id=?1", [id], |r| r.get(0))?;
+        validate_floor(&floor)?;
         tasks.push(Task {
+            floor,
             notes,
             links,
             active_months,
@@ -266,6 +284,37 @@ pub fn list(conn: &Connection, today: NaiveDate) -> Result<TaskList> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn floors_persist_and_invalid_edits_leave_task_unchanged() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("floors.db");
+        let today = date("2026-11-25").unwrap();
+        {
+            let mut c = crate::database::open(&path).unwrap();
+            let mut input: TaskInput = serde_json::from_value(serde_json::json!({
+                "floor": "1st floor", "title": "Floor chore", "categoryId": 1,
+                "schedule": {"kind": "relative", "value": 7, "unit": "days"},
+                "trackingStartOn": "2026-11-25"
+            }))
+            .unwrap();
+            let id = save(&mut c, &input, today).unwrap();
+            input.id = Some(id);
+            for floor in ["1st floor", "2nd floor", "Basement", "Garage", "Outside"] {
+                input.floor = floor.into();
+                save(&mut c, &input, today).unwrap();
+                assert_eq!(list(&c, today).unwrap().tasks[0].floor, floor);
+            }
+            input.floor = "Attic".into();
+            input.title = "Invalid edit".into();
+            assert!(save(&mut c, &input, today).is_err());
+            assert!(c.execute("UPDATE tasks SET floor='Attic'", []).is_err());
+        }
+        let c = crate::database::open(&path).unwrap();
+        let task = list(&c, today).unwrap().tasks.remove(0);
+        assert_eq!(task.floor, "Outside");
+        assert_eq!(task.title, "Floor chore");
+    }
+
     #[test]
     fn untracked_state_survives_restart_and_follows_history() {
         let dir = tempfile::tempdir().unwrap();
@@ -335,6 +384,7 @@ mod tests {
         {
             let mut c = crate::database::open(&path).unwrap();
             let mut input = TaskInput {
+                floor: "Garage".into(),
                 notes: "Use cleaning cycle\nModel ABC".into(),
                 links: vec!["https://example.com/manual".into()],
                 active_months: vec![],
@@ -370,6 +420,7 @@ mod tests {
         {
             let mut c = crate::database::open(&path).unwrap();
             let input = TaskInput {
+                floor: "Garage".into(),
                 notes: String::new(),
                 links: vec![],
                 active_months: vec![11, 12, 1, 2],
@@ -412,6 +463,7 @@ mod tests {
         {
             let mut c = crate::database::open(&path).unwrap();
             let mut input = TaskInput {
+                floor: "Garage".into(),
                 notes: String::new(),
                 links: vec![],
                 active_months: vec![],

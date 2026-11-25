@@ -96,7 +96,7 @@ export function TaskDetail({
           </p>
         )}
         <p className="muted small">
-          {task.categoryName} · {recurrence(task.schedule)}
+          {task.categoryName} · {task.floor} · {recurrence(task.schedule)}
         </p>
         {task.activeMonths.length > 0 && task.activeMonths.length < 12 && (
           <p className="hint">
