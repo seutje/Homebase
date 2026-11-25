@@ -540,9 +540,10 @@ main > :not(.task-list) {
   background: #f0efe8;
   border-radius: 8px;
 }
-.detail-edit {
-  margin-top: 18px;
-  font-size: 13px;
+.detail-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .detail-shade {
   position: fixed;

@@ -79,14 +79,19 @@ export function TaskDetail({
       <aside className="detail-panel" aria-label="Task details">
         <header className="dialog-header">
           <p className="eyebrow">TASK DETAILS</p>
-          <button
-            className="icon-button"
-            disabled={working}
-            aria-label="Close details"
-            onClick={onClose}
-          >
-            ×
-          </button>
+          <div className="detail-header-actions">
+            <button disabled={working || busy} onClick={onEdit}>
+              Edit task
+            </button>
+            <button
+              className="icon-button"
+              disabled={working}
+              aria-label="Close details"
+              onClick={onClose}
+            >
+              ×
+            </button>
+          </div>
         </header>
         <h2>{task.title}</h2>
         {task.isOutOfSeason && <p className="state-label">Out of season</p>}
@@ -142,13 +147,6 @@ export function TaskDetail({
           onBackdate={onBackdate}
           onSnooze={onSnooze}
         />
-        <button
-          className="text-button detail-edit"
-          disabled={working}
-          onClick={onEdit}
-        >
-          Edit task
-        </button>
         {(task.notes || task.links.length > 0) && (
           <section className="task-notes">
             <h3>Notes and links</h3>

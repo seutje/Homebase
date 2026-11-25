@@ -115,3 +115,11 @@ Run `npx --yes @playwright/cli -s=homebase-features run-code --filename scripts/
 ## Task floors
 
 Run `npx --yes @playwright/cli -s=homebase-floors run-code --filename scripts/qa/floors.js` after attaching to the isolated v2 debug harness. The script checks the default floor, native create/edit persistence, combined category/search/status/floor filtering, Clear filters, and 1180 × 800 / 900 × 600 layouts. It creates and removes only its named QA task and writes screenshots under `.qa/`.
+
+## Task edit button
+
+Run `npx --yes @playwright/cli -s=homebase-edit run-code --filename scripts/qa/task-edit.js`
+after attaching to the isolated v2 debug harness. This verifies the detail-header
+button, prefilled dialog, Cancel, same-task saving without duplicates, preserved
+notes/completion date, reload persistence, and ordinary/minimum layouts. It creates
+and removes only its named QA fixture and writes screenshots under `.qa/`.

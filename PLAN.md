@@ -171,3 +171,14 @@ for the task-floor changes. Version/tag validation, both release checks, and
 formatting passed. Application tests and packaged-app checks were not repeated
 for this version-only change. The release commit and tag are local; publishing
 requires pushing the tag to run the signed GitHub release workflow.
+
+## Phase 15 — Visible task editing
+
+- [x] Promote Edit task to a regular button in the detail header, using the existing shared prefilled task form and same-task update command.
+- [x] Verify all editable fields are prefilled, failed saves preserve input, and retry updates the original task without changing completion history.
+- [x] Verify native save/reload persistence and inspect ordinary/minimum detail and dialog layouts through Playwright CLI.
+
+Verified: 18 frontend tests and 29 native tests passed, plus lint, formatting,
+typecheck, and production build. The isolated native QA workflow checked Cancel,
+same-task updates without duplicates, preserved notes/completion date, and reload
+persistence at 1180 × 800 and 900 × 600. No installer was built or release published.

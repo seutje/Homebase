@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
@@ -57,6 +58,96 @@ afterEach(() => {
 });
 
 describe('completion workflows', () => {
+  it('prefills task edits and updates the same task after a failed save and retry', async () => {
+    task = {
+      ...task,
+      floor: 'Garage',
+      schedule: { kind: 'weekly', weekday: 3 },
+      notes: 'Use the gentle cycle',
+      links: ['https://example.com/manual'],
+      activeMonths: [3, 11],
+      comingUpDays: 4,
+      graceDays: 2,
+    };
+    const original = { ...task };
+    const save = vi
+      .spyOn(api, 'saveTask')
+      .mockRejectedValueOnce({ message: 'Could not save task.' })
+      .mockImplementation(async (input) => {
+        task = { ...task, ...input, id: task.id };
+        return task.id;
+      });
+    vi.spyOn(api, 'history').mockResolvedValue([]);
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(
+      await screen.findByRole('button', { name: /Wash bedsheets\s*Every/ }),
+    );
+    await user.click(screen.getByRole('button', { name: 'Edit task' }));
+    const dialog = within(screen.getByRole('dialog'));
+    expect(dialog.getByRole('heading', { name: 'Edit task' })).toBeVisible();
+    expect(dialog.getByLabelText('Task name')).toHaveValue(original.title);
+    expect(dialog.getByLabelText('Category')).toHaveValue('2');
+    expect(dialog.getByLabelText('Floor')).toHaveValue('Garage');
+    expect(dialog.getByLabelText('Repeat')).toHaveValue('weekly');
+    expect(dialog.getByLabelText('Weekday')).toHaveValue('3');
+    await user.click(dialog.getByText('Tracking start date'));
+    expect(dialog.getByLabelText('First due / start tracking')).toHaveValue(
+      original.trackingStartOn,
+    );
+    await user.click(dialog.getByText('Personal urgency'));
+    expect(dialog.getByLabelText('Coming up (days)')).toHaveValue(4);
+    expect(dialog.getByLabelText('Overdue grace (days)')).toHaveValue(2);
+    await user.click(dialog.getByText('Seasonal months'));
+    expect(dialog.getByRole('button', { name: 'Mar' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(dialog.getByRole('button', { name: 'Nov' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await user.click(dialog.getByText('Notes and links'));
+    expect(dialog.getByLabelText('Notes')).toHaveValue(original.notes);
+    expect(dialog.getByLabelText('Links (one per line)')).toHaveValue(
+      original.links[0],
+    );
+    await user.clear(dialog.getByLabelText('Task name'));
+    await user.type(dialog.getByLabelText('Task name'), 'Wash guest bedsheets');
+    await user.selectOptions(dialog.getByLabelText('Category'), '1');
+    await user.selectOptions(dialog.getByLabelText('Floor'), 'Basement');
+    await user.selectOptions(dialog.getByLabelText('Repeat'), 'relative');
+    fireEvent.change(dialog.getByLabelText('Interval'), {
+      target: { value: '2' },
+    });
+    await user.selectOptions(dialog.getByLabelText('Unit'), 'weeks');
+    await user.click(dialog.getByRole('button', { name: 'Save task' }));
+    await screen.findByText('Could not save task.');
+    expect(dialog.getByLabelText('Task name')).toHaveValue(
+      'Wash guest bedsheets',
+    );
+    expect(screen.getByRole('heading', { name: original.title })).toBeVisible();
+    await user.click(dialog.getByRole('button', { name: 'Save task' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(save).toHaveBeenLastCalledWith({
+      id: original.id,
+      title: 'Wash guest bedsheets',
+      categoryId: 1,
+      floor: 'Basement',
+      schedule: { kind: 'relative', value: 2, unit: 'weeks' },
+      trackingStartOn: original.trackingStartOn,
+      initialCompletedOn: null,
+      notes: original.notes,
+      links: original.links,
+      activeMonths: original.activeMonths,
+      comingUpDays: original.comingUpDays,
+      graceDays: original.graceDays,
+    });
+    expect(
+      screen.getByRole('heading', { name: 'Wash guest bedsheets' }),
+    ).toBeVisible();
+    expect(task.lastCompletedOn).toBe(original.lastCompletedOn);
+  });
   it('defaults new floors, preserves edits and retains input after a failed save', async () => {
     const user = userEvent.setup();
     const save = vi

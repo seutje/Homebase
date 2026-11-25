@@ -82,7 +82,7 @@ Editing a recurrence recalculates due status immediately from existing history; 
 
 ### Task detail and history
 
-Show title, category, last completion, next due date, recurrence, Done, Complete on another date, Edit task, and completion history newest first. History entries show unambiguous full dates with Edit date and Delete actions. Confirm history deletion; date corrections reject future or duplicate dates. Changing/deleting the newest entry immediately recalculates elapsed time and due date. If all history is removed or the first completion is undone, return to Never completed / Not yet tracked.
+Show title, category, last completion, next due date, recurrence, Done, Complete on another date, Edit task, and completion history newest first. Keep a regular Edit task button in the detail header. It opens the shared Add a task dialog with the existing task fields prefilled; Save task updates that same task and refreshes the list and details. Completion dates remain editable through history. History entries show unambiguous full dates with Edit date and Delete actions. Confirm history deletion; date corrections reject future or duplicate dates. Changing/deleting the newest entry immediately recalculates elapsed time and due date. If all history is removed or the first completion is undone, return to Never completed / Not yet tracked.
 
 Deleting a task requires confirmation explaining that its history will also be deleted. Category deletion offers moving its tasks to another category, defaulting to Uncategorized; execute reassignment and deletion together. Protect Uncategorized from deletion. Renaming a category preserves all task associations. No archive system in v1.
 
